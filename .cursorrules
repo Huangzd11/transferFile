@@ -1,4 +1,4 @@
--这是一个文件传输（V0.0.1）项目
+-这是一个文件传输（V0.0.2）项目
 -项目需求：
 -1、平台下发召唤文件指令（MQTT）
 -2、网关侧先应答文件简报，之后再应答文件内容数据
@@ -12,6 +12,9 @@
 -项目结构按照C++项目最佳实践来进行组织管理
 -本项目以测试驱动开发（TDD）为主要开发方式，需要先编写测试用例，然后编写代码，然后运行测试用例，确保测试用例通过.
 -所有文档在独立的document子目录下进行管理
+-部署拓扑：开发机运行 platform_sim 模拟平台；目标机（OpenWrt aarch64）运行 transferFile 网关
+-交叉编译产物：build-openwrt/transferFile；库：third_party/mosquitto-aarch64/lib/
+-验收：./scripts/run-acceptance-tests.sh；状态与路线图见 document/13-项目状态与路线图.md
 
 # Karpathy Guidelines
 
