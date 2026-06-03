@@ -120,6 +120,9 @@ echo "test from target" > /tmp/platform_test_file.bin
 | `--publish '<json>'` | 自定义召唤 |
 | `-f summon.json` | 从文件读召唤 |
 | `--listen-only` | 只收应答 |
+| `--push-file` | V0.0.3：向网关推送文件（需 `--gateway-path`） |
+
+**V0.0.4**：`platform_sim` 在召唤上传时会对每段内容自动发布 `content_confirm`（与单元测试模拟器行为一致）。
 
 ## 7. 预期日志
 
@@ -131,7 +134,7 @@ echo "test from target" > /tmp/platform_test_file.bin
 tail -f log/$(date +%Y-%m-%d).log
 ```
 
-简要期望：网关出现 `MQTT 已连接` → `收到召唤` → `简报成功` → `传输完成`；平台出现 `已发布召唤` → `联调成功`。
+简要期望：网关出现 `MQTT 已连接` → `收到召唤` → `简报成功` → `收到文件内容确认`（每段，V0.0.4）→ `传输完成`；平台出现 `已发布召唤` → `已发布内容确认` → `联调成功`。
 
 ## 8. 常见问题
 
