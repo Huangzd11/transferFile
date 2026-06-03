@@ -18,8 +18,10 @@
 #include <chrono>
 #include <csignal>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <thread>
 
@@ -38,34 +40,66 @@ void printUsage(const char* prog) {
               << "  -h, --help           显示帮助\n";
 }
 
+std::string joinPathRoots(const std::vector<std::string>& roots) {
+    std::ostringstream os;
+    for (size_t i = 0; i < roots.size(); ++i) {
+        if (i) os << ", ";
+        os << roots[i];
+    }
+    return os.str();
+}
+
+// Topic 去掉公共前缀，避免重复打印 transfer/sim/gw001/
+std::string shortTopic(const std::string& topic, const std::string& prefix) {
+    if (prefix.empty() || topic.size() < prefix.size()) return topic;
+    if (topic.compare(0, prefix.size(), prefix) == 0) {
+        return topic.substr(prefix.size());
+    }
+    return topic;
+}
+
+void printTopicLine(const char* dir, const char* name, const std::string& suffix) {
+    std::cout << "      " << std::left << std::setw(4) << dir << std::setw(18) << name << " "
+              << suffix << "\n";
+}
+
 void printBanner(const transfer::AppConfig& app) {
     const auto& mqtt = app.mqtt;
     const auto& tr = app.transfer;
-    std::cout << "=== transferFile V" << transfer::kVersionString << " ===\n"
-              << "编译时间: " << transfer::kBuildDateTime << "\n";
-    if (!app.configFilePath.empty()) {
-        std::cout << "配置文件: " << app.configFilePath << "\n";
-    } else {
-        std::cout << "配置文件: (未找到，使用内置默认值)\n";
+    const std::string topicBase = "transfer/sim/" + mqtt.gatewayId + "/";
+
+    std::string mode = mqtt.useSimulatedBus ? "模拟总线" : "mosquitto";
+    if (!mqtt.useSimulatedBus && !transfer::isMosquittoSupported()) {
+        mode += "(未编译)";
     }
-    std::cout << "传输超时: " << tr.timeoutSec << "s, 分块: " << tr.chunkSize << " 字节\n"
-              << "允许路径: ";
-    for (size_t i = 0; i < tr.allowedPathRoots.size(); ++i) {
-        if (i) std::cout << ", ";
-        std::cout << tr.allowedPathRoots[i];
+
+    std::cout << "  transferFile V" << transfer::kVersionString << "\n"
+              << "  ---------------------------------------------\n"
+              << "  编译  " << transfer::kBuildDateTime << "\n"
+              << "  配置  "
+              << (app.configFilePath.empty() ? "(内置默认)" : app.configFilePath) << "\n"
+              << "  传输  " << tr.timeoutSec << "s · " << tr.chunkSize << "B    路径  "
+              << joinPathRoots(tr.allowedPathRoots) << "\n"
+              << "  MQTT  " << mqtt.brokerHost << ":" << mqtt.brokerPort << " · "
+              << mqtt.gatewayId;
+    if (!mqtt.clientId.empty() && mqtt.clientId.find(mqtt.gatewayId) == std::string::npos) {
+        std::cout << " · " << mqtt.clientId;
     }
-    std::cout << "\n"
-              << "MQTT: " << mqtt.brokerHost << ":" << mqtt.brokerPort << "\n"
-              << "ClientId: " << mqtt.clientId << "\n"
-              << "模式: " << (mqtt.useSimulatedBus ? "模拟总线" : "libmosquitto")
-              << (transfer::isMosquittoSupported() ? "" : " (未编译 mosquitto)") << "\n"
-              << "订阅召唤: " << mqtt.topicSummon << "\n"
-              << "发布简报: " << mqtt.topicBrief << "\n"
-              << "发布内容: " << mqtt.topicContent << "\n"
-              << "订阅推送简报: " << mqtt.topicPushBrief << "\n"
-              << "发布推送简报确认: " << mqtt.topicPushBriefConfirm << "\n"
-              << "订阅推送内容: " << mqtt.topicPushContent << "\n"
-              << "发布推送内容确认: " << mqtt.topicPushContentConfirm << "\n";
+    std::cout << " · " << mode << "\n"
+              << "  Topic " << topicBase << "\n"
+              << "      召唤上传\n";
+    printTopicLine("sub", "summon", shortTopic(mqtt.topicSummon, topicBase));
+    printTopicLine("pub", "brief", shortTopic(mqtt.topicBrief, topicBase));
+    printTopicLine("pub", "content", shortTopic(mqtt.topicContent, topicBase));
+    std::cout << "      平台推送\n";
+    printTopicLine("sub", "push/brief", shortTopic(mqtt.topicPushBrief, topicBase));
+    printTopicLine("pub", "push/brief_ok",
+                    shortTopic(mqtt.topicPushBriefConfirm, topicBase));
+    printTopicLine("sub", "push/content", shortTopic(mqtt.topicPushContent, topicBase));
+    printTopicLine("pub", "push/content_ok",
+                    shortTopic(mqtt.topicPushContentConfirm, topicBase));
+    std::cout << "  ---------------------------------------------\n"
+              << "  就绪  召唤上传 + 平台推送 (Ctrl+C 退出)\n\n";
 }
 
 int runSimulateDemo(transfer::SimulatedMqttBus& bus, const transfer::AppConfig& app,
@@ -204,14 +238,7 @@ int main(int argc, char* argv[]) {
     std::signal(SIGINT, onSignal);
     std::signal(SIGTERM, onSignal);
 
-    transfer::log::gatewayInfo(
-        "服务就绪：支持平台召唤上传 + 平台推送文件至网关（Ctrl+C 退出）");
-    if (app.mqtt.useSimulatedBus) {
-        transfer::log::gatewayInfo("提示: 向召唤 Topic 发布 JSON，本网关将读文件并回传简报+内容");
-    } else {
-        transfer::log::gatewayInfo(
-            "提示: 开发机运行 platform_sim 发召唤；本网关为目标机，读本地文件后上传");
-    }
+    transfer::log::gatewayInfo("服务就绪：召唤上传 + 平台推送");
 
     while (g_running) {
         int loopRc = mqtt->loop(100);

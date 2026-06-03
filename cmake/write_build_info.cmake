@@ -1,4 +1,5 @@
 # 生成 transfer/build_info.hpp（版本号 + 编译时间戳）
+# 由 CMakeLists 的 transfer_refresh_build_info（ALL）在每次构建时调用
 if(NOT DEFINED OUTPUT_FILE)
     message(FATAL_ERROR "OUTPUT_FILE 未指定")
 endif()

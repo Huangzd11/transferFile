@@ -4,10 +4,23 @@
 #include "transfer/runtime_log.hpp"
 
 #include <sstream>
+#include <string_view>
 #include <vector>
 
 namespace transfer {
 namespace {
+
+// 日志中附带 JSON 报文；过长时截断避免 Base64 内容段刷屏
+std::string payloadForLog(std::string_view payload, size_t maxLen = 2048) {
+    if (payload.size() <= maxLen) {
+        return std::string(payload);
+    }
+    std::string s(payload.substr(0, maxLen));
+    s += "...[截断, 总长 ";
+    s += std::to_string(payload.size());
+    s += " 字节]";
+    return s;
+}
 
 std::string fileErrorToCode(FileOpenError err) {
     switch (err) {
@@ -93,10 +106,12 @@ void TransferOrchestrator::sendContentFrom(SessionRecord& session, FileHandle& h
         seg.contentRaw = std::move(buf);
         seg.continueFlag = (offset < session.fileSize);
 
-        mqtt_.publishContent(codec_.encodeContent(seg));
+        const std::string contentJson = codec_.encodeContent(seg);
+        mqtt_.publishContent(contentJson);
         std::ostringstream os;
         os << ">>> 已发布内容段 CmdId=" << session.cmdId << " SegNo=" << seg.fileSegNo
-           << " 字节=" << segBytes << " Continue=" << (seg.continueFlag ? "1" : "0");
+           << " 字节=" << segBytes << " Continue=" << (seg.continueFlag ? "1" : "0")
+           << " 报文: " << payloadForLog(contentJson);
         log::gatewayInfo(os.str());
     }
 
@@ -111,7 +126,8 @@ void TransferOrchestrator::sendContentFrom(SessionRecord& session, FileHandle& h
 }
 
 void TransferOrchestrator::onSummon(std::string_view jsonUtf8) {
-    log::gatewayInfo("<<< 收到召唤报文，长度 " + std::to_string(jsonUtf8.size()) + " 字节");
+    log::gatewayInfo("<<< 收到召唤报文，长度 " + std::to_string(jsonUtf8.size()) +
+                     " 字节 报文: " + payloadForLog(jsonUtf8));
 
     SummonRequest req;
     std::string errDetail;
@@ -181,11 +197,13 @@ void TransferOrchestrator::onSummon(std::string_view jsonUtf8) {
     br.fileSize = fileSize;
     br.fileCrc = crcHex;
     br.modifyTime = modifyTime;
-    mqtt_.publishBrief(codec_.encodeBrief(br));
+    const std::string briefJson = codec_.encodeBrief(br);
+    mqtt_.publishBrief(briefJson);
     {
         std::ostringstream os;
         os << ">>> 已发布简报成功 CmdId=" << req.cmdId << " FileSize=" << fileSize
-           << " FileCrc=" << crcHex << " ModifyTime=" << modifyTime;
+           << " FileCrc=" << crcHex << " ModifyTime=" << modifyTime
+           << " 报文: " << briefJson;
         log::gatewayInfo(os.str());
     }
 

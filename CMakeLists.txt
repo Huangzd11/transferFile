@@ -10,17 +10,17 @@ option(BUILD_TESTING "Build unit tests" ON)
 
 include(cmake/Dependencies.cmake)
 
-# 编译前生成版本与编译时间（YYYY-MM-DD HH:MM:SS.mmm）
+# 每次构建刷新版本与编译时间（YYYY-MM-DD HH:MM:SS.mmm）
+# 勿用 OUTPUT 型 custom_command：已存在时不会重跑，导致 kBuildDateTime 陈旧
 set(TRANSFER_GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
 set(TRANSFER_BUILD_INFO_HPP "${TRANSFER_GENERATED_DIR}/transfer/build_info.hpp")
-add_custom_command(
-    OUTPUT "${TRANSFER_BUILD_INFO_HPP}"
+add_custom_target(transfer_refresh_build_info ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory "${TRANSFER_GENERATED_DIR}/transfer"
     COMMAND ${CMAKE_COMMAND}
         -DOUTPUT_FILE=${TRANSFER_BUILD_INFO_HPP}
         -DPROJECT_VERSION=${PROJECT_VERSION}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_build_info.cmake
-    COMMENT "生成 build_info.hpp（版本与编译时间）"
+    COMMENT "刷新 build_info.hpp（版本与编译时间）"
     VERBATIM
 )
 
@@ -29,7 +29,6 @@ if(BUILD_TESTING AND NOT TRANSFER_USE_GTEST)
 endif()
 
 add_library(transfer_core
-    ${TRANSFER_BUILD_INFO_HPP}
     src/protocol/base64.cpp
     src/protocol/crc32.cpp
     src/protocol/json_codec.cpp
@@ -56,9 +55,8 @@ target_include_directories(transfer_core
         ${TRANSFER_GENERATED_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-set_source_files_properties(${TRANSFER_BUILD_INFO_HPP} PROPERTIES GENERATED TRUE)
-
 target_compile_options(transfer_core PRIVATE -Wall -Wextra)
+add_dependencies(transfer_core transfer_refresh_build_info)
 
 if(TRANSFER_MOSQUITTO_ENABLED)
     target_compile_definitions(transfer_core PUBLIC TRANSFER_WITH_MOSQUITTO)
@@ -68,6 +66,7 @@ endif()
 
 add_executable(transferFile src/main.cpp)
 target_link_libraries(transferFile PRIVATE transfer_core)
+add_dependencies(transferFile transfer_refresh_build_info)
 
 # 本机平台模拟程序（仅主机编译）
 if(NOT CMAKE_CROSSCOMPILING AND TRANSFER_MOSQUITTO_ENABLED)
@@ -75,6 +74,7 @@ if(NOT CMAKE_CROSSCOMPILING AND TRANSFER_MOSQUITTO_ENABLED)
     target_link_libraries(platform_sim PRIVATE transfer_core ${MOSQUITTO_LIBRARIES} pthread)
     target_include_directories(platform_sim PRIVATE ${MOSQUITTO_INCLUDE_DIRS})
     target_compile_definitions(platform_sim PRIVATE TRANSFER_WITH_MOSQUITTO)
+    add_dependencies(platform_sim transfer_refresh_build_info)
 endif()
 
 if(BUILD_TESTING)
