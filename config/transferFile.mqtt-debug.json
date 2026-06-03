@@ -1,0 +1,22 @@
+{
+  "_comment": "仅当网关与平台都在本机时的冒烟配置；正常联调请用 transferFile.platform.json + transferFile.gateway.target.json",
+  "transfer": {
+    "timeoutSec": "180",
+    "chunkSize": "4096",
+    "allowedPathRoots": ["/tmp/", "/data/transfer/"]
+  },
+  "mqtt": {
+    "brokerHost": "127.0.0.1",
+    "brokerPort": "1883",
+    "gatewayId": "gw001",
+    "clientId": "",
+    "topicSummon": "",
+    "topicBrief": "",
+    "topicContent": "",
+    "useSimulatedBus": "false",
+    "username": "",
+    "password": "",
+    "qos": "1",
+    "keepAliveSec": "60"
+  }
+}

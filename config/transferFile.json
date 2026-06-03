@@ -1,0 +1,21 @@
+{
+  "transfer": {
+    "timeoutSec": "180",
+    "chunkSize": "4096",
+    "allowedPathRoots": ["/tmp/", "/data/transfer/"]
+  },
+  "mqtt": {
+    "brokerHost": "127.0.0.1",
+    "brokerPort": "1883",
+    "gatewayId": "gw001",
+    "clientId": "",
+    "topicSummon": "",
+    "topicBrief": "",
+    "topicContent": "",
+    "useSimulatedBus": "true",
+    "username": "",
+    "password": "",
+    "qos": "1",
+    "keepAliveSec": "60"
+  }
+}

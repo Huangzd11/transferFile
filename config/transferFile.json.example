@@ -1,0 +1,18 @@
+{
+  "_comment": "网关文件传输配置示例；复制为 transferFile.json 后修改。字符串数值与协议一致。",
+  "transfer": {
+    "timeoutSec": "180",
+    "chunkSize": "4096",
+    "allowedPathRoots": ["/tmp/", "/data/transfer/"]
+  },
+  "mqtt": {
+    "brokerHost": "127.0.0.1",
+    "brokerPort": "1883",
+    "gatewayId": "gw001",
+    "clientId": "",
+    "topicSummon": "",
+    "topicBrief": "",
+    "topicContent": "",
+    "useSimulatedBus": "true"
+  }
+}

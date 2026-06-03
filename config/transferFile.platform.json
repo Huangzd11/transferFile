@@ -1,0 +1,22 @@
+{
+  "_comment": "开发机 platform_sim：本机模拟平台。Broker 若在开发机跑 mosquitto，用 127.0.0.1；若在别处填实际 IP",
+  "transfer": {
+    "timeoutSec": "180",
+    "chunkSize": "4096",
+    "allowedPathRoots": ["/tmp/"]
+  },
+  "mqtt": {
+    "brokerHost": "172.21.9.146",
+    "brokerPort": "1883",
+    "gatewayId": "gw001",
+    "clientId": "",
+    "topicSummon": "",
+    "topicBrief": "",
+    "topicContent": "",
+    "useSimulatedBus": "false",
+    "username": "",
+    "password": "",
+    "qos": "1",
+    "keepAliveSec": "60"
+  }
+}

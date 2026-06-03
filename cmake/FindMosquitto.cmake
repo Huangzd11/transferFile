@@ -1,0 +1,47 @@
+# 查找 libmosquitto（pkg-config / MOSQUITTO_ROOT / 默认交叉编译预置路径）
+
+if(DEFINED ENV{MOSQUITTO_ROOT})
+    set(MOSQUITTO_ROOT "$ENV{MOSQUITTO_ROOT}" CACHE PATH "libmosquitto 安装前缀")
+endif()
+
+if(NOT MOSQUITTO_ROOT)
+    if(CMAKE_CROSSCOMPILING)
+        set(_default_prebuilt "${CMAKE_SOURCE_DIR}/third_party/mosquitto-aarch64")
+    else()
+        set(_default_prebuilt "${CMAKE_SOURCE_DIR}/third_party/mosquitto-native")
+    endif()
+    if(EXISTS "${_default_prebuilt}/lib/libmosquitto.so" OR EXISTS "${_default_prebuilt}/lib/libmosquitto.a")
+        set(MOSQUITTO_ROOT "${_default_prebuilt}" CACHE PATH "预编译 libmosquitto")
+    endif()
+endif()
+
+if(MOSQUITTO_ROOT)
+    find_path(MOSQUITTO_INCLUDE_DIR mosquitto.h HINTS "${MOSQUITTO_ROOT}/include")
+    find_library(MOSQUITTO_LIBRARY NAMES mosquitto libmosquitto.a libmosquitto
+        HINTS "${MOSQUITTO_ROOT}/lib")
+    if(MOSQUITTO_INCLUDE_DIR AND MOSQUITTO_LIBRARY)
+        set(MOSQUITTO_FOUND TRUE)
+        set(MOSQUITTO_INCLUDE_DIRS ${MOSQUITTO_INCLUDE_DIR})
+        set(MOSQUITTO_LIBRARIES ${MOSQUITTO_LIBRARY})
+    endif()
+endif()
+
+if(NOT MOSQUITTO_FOUND)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(MOSQUITTO QUIET libmosquitto)
+    endif()
+endif()
+
+if(NOT MOSQUITTO_FOUND)
+    find_path(MOSQUITTO_INCLUDE_DIR mosquitto.h)
+    find_library(MOSQUITTO_LIBRARY NAMES mosquitto)
+    if(MOSQUITTO_INCLUDE_DIR AND MOSQUITTO_LIBRARY)
+        set(MOSQUITTO_FOUND TRUE)
+        set(MOSQUITTO_INCLUDE_DIRS ${MOSQUITTO_INCLUDE_DIR})
+        set(MOSQUITTO_LIBRARIES ${MOSQUITTO_LIBRARY})
+    endif()
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Mosquitto DEFAULT_MSG MOSQUITTO_LIBRARIES MOSQUITTO_INCLUDE_DIRS)

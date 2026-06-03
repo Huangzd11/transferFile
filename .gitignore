@@ -1,0 +1,8 @@
+log/
+build/
+build-openwrt/
+third_party/mosquitto-src/
+third_party/mosquitto-src-native/
+third_party/mosquitto-aarch64/
+third_party/mosquitto-native/
+third_party/mosquitto-*.tar.gz
