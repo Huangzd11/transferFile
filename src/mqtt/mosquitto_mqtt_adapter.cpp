@@ -18,22 +18,26 @@ void onConnect(struct mosquitto* mosq, void* userdata, int rc) {
         return;
     }
     const MqttConfig& cfg = self->config();
-    int subRc = mosquitto_subscribe(mosq, nullptr, cfg.topicSummon.c_str(), cfg.qos);
-    if (subRc != MOSQ_ERR_SUCCESS) {
-        log::gatewayError("订阅召唤 Topic 失败: " + cfg.topicSummon);
-    } else {
-        log::gatewayInfo("MQTT 已连接 Broker，已订阅: " + cfg.topicSummon);
-    }
+    mosquitto_subscribe(mosq, nullptr, cfg.topicSummon.c_str(), cfg.qos);
+    mosquitto_subscribe(mosq, nullptr, cfg.topicPushBrief.c_str(), cfg.qos);
+    mosquitto_subscribe(mosq, nullptr, cfg.topicPushContent.c_str(), cfg.qos);
+    log::gatewayInfo("MQTT 已连接，已订阅召唤与推送 Topic");
 }
 
 void onMessage(struct mosquitto* /*mosq*/, void* userdata,
                const struct mosquitto_message* message) {
     auto* self = static_cast<MosquittoMqttAdapter*>(userdata);
     if (!message || !message->payload || !message->topic) return;
-    if (self->config().topicSummon != message->topic) return;
-
+    std::string topic(message->topic);
     std::string payload(static_cast<const char*>(message->payload), message->payloadlen);
-    self->dispatchSummon(payload);
+    const MqttConfig& cfg = self->config();
+    if (topic == cfg.topicSummon) {
+        self->dispatchSummon(payload);
+    } else if (topic == cfg.topicPushBrief) {
+        self->dispatchPushBrief(payload);
+    } else if (topic == cfg.topicPushContent) {
+        self->dispatchPushContent(payload);
+    }
 }
 
 }  // namespace
@@ -43,6 +47,16 @@ void MosquittoMqttAdapter::dispatchSummon(const std::string& payload) {
     if (onSummon_) onSummon_(payload);
 }
 
+void MosquittoMqttAdapter::dispatchPushBrief(const std::string& payload) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    if (onPushBrief_) onPushBrief_(payload);
+}
+
+void MosquittoMqttAdapter::dispatchPushContent(const std::string& payload) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    if (onPushContent_) onPushContent_(payload);
+}
+
 MosquittoMqttAdapter::MosquittoMqttAdapter(const MqttConfig& config) : config_(config) {}
 
 MosquittoMqttAdapter::~MosquittoMqttAdapter() { stop(); }
@@ -50,6 +64,16 @@ MosquittoMqttAdapter::~MosquittoMqttAdapter() { stop(); }
 void MosquittoMqttAdapter::setSummonHandler(std::function<void(std::string_view)> handler) {
     std::lock_guard<std::mutex> lock(handlerMutex_);
     onSummon_ = std::move(handler);
+}
+
+void MosquittoMqttAdapter::setPushBriefHandler(std::function<void(std::string_view)> handler) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    onPushBrief_ = std::move(handler);
+}
+
+void MosquittoMqttAdapter::setPushContentHandler(std::function<void(std::string_view)> handler) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    onPushContent_ = std::move(handler);
 }
 
 bool MosquittoMqttAdapter::start(std::string& errorDetail) {
@@ -126,6 +150,14 @@ bool MosquittoMqttAdapter::publishContent(std::string_view jsonUtf8) {
     return publishTopic(config_.topicContent, jsonUtf8);
 }
 
+bool MosquittoMqttAdapter::publishPushBriefConfirm(std::string_view jsonUtf8) {
+    return publishTopic(config_.topicPushBriefConfirm, jsonUtf8);
+}
+
+bool MosquittoMqttAdapter::publishPushContentConfirm(std::string_view jsonUtf8) {
+    return publishTopic(config_.topicPushContentConfirm, jsonUtf8);
+}
+
 }  // namespace transfer
 
 #else  // !TRANSFER_WITH_MOSQUITTO
@@ -133,10 +165,14 @@ bool MosquittoMqttAdapter::publishContent(std::string_view jsonUtf8) {
 namespace transfer {
 
 void MosquittoMqttAdapter::dispatchSummon(const std::string&) {}
+void MosquittoMqttAdapter::dispatchPushBrief(const std::string&) {}
+void MosquittoMqttAdapter::dispatchPushContent(const std::string&) {}
 
 MosquittoMqttAdapter::MosquittoMqttAdapter(const MqttConfig&) {}
 MosquittoMqttAdapter::~MosquittoMqttAdapter() = default;
 void MosquittoMqttAdapter::setSummonHandler(std::function<void(std::string_view)>) {}
+void MosquittoMqttAdapter::setPushBriefHandler(std::function<void(std::string_view)>) {}
+void MosquittoMqttAdapter::setPushContentHandler(std::function<void(std::string_view)>) {}
 bool MosquittoMqttAdapter::start(std::string& errorDetail) {
     errorDetail = "构建时未启用 libmosquitto (TRANSFER_WITH_MOSQUITTO)";
     return false;
@@ -145,6 +181,8 @@ void MosquittoMqttAdapter::stop() {}
 int MosquittoMqttAdapter::loop(int) { return -1; }
 bool MosquittoMqttAdapter::publishBrief(std::string_view) { return false; }
 bool MosquittoMqttAdapter::publishContent(std::string_view) { return false; }
+bool MosquittoMqttAdapter::publishPushBriefConfirm(std::string_view) { return false; }
+bool MosquittoMqttAdapter::publishPushContentConfirm(std::string_view) { return false; }
 
 }  // namespace transfer
 

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "transfer/build_info.hpp"
+
 namespace transfer {
 
-// 网关程序版本（与 CMake project VERSION 对齐）
-inline constexpr const char* kVersionString = "0.0.2";
+// 版本与编译时间见构建生成的 transfer/build_info.hpp（kVersionString、kBuildDateTime）
 
 }  // namespace transfer

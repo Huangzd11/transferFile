@@ -125,6 +125,31 @@ FileOpenError FileStore::readAt(const FileHandle& handle, uint64_t offset,
     return FileOpenError::Ok;
 }
 
+FileOpenError FileStore::openWriteCreate(const std::string& fullPath, FileHandle& out) {
+    if (validatePath(fullPath) != FileOpenError::Ok) return FileOpenError::InvalidPath;
+    int fd = ::open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        if (errno == EACCES) return FileOpenError::PermissionDenied;
+        return FileOpenError::IoError;
+    }
+    out = FileHandle(fd);
+    return FileOpenError::Ok;
+}
+
+FileOpenError FileStore::writeAt(const FileHandle& handle, uint64_t offset,
+                                 const uint8_t* buffer, size_t bufferSize,
+                                 size_t& outWritten) {
+    outWritten = 0;
+    if (!handle.valid() || bufferSize == 0) return FileOpenError::IoError;
+    if (offset > static_cast<uint64_t>(LLONG_MAX)) return FileOpenError::IoError;
+    off_t off = static_cast<off_t>(offset);
+    if (::lseek(handle.fd(), off, SEEK_SET) < 0) return FileOpenError::IoError;
+    ssize_t n = ::write(handle.fd(), buffer, bufferSize);
+    if (n < 0) return FileOpenError::IoError;
+    outWritten = static_cast<size_t>(n);
+    return FileOpenError::Ok;
+}
+
 void FileStore::close(FileHandle& handle) { handle = FileHandle(); }
 
 }  // namespace transfer

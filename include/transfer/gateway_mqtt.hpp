@@ -2,6 +2,7 @@
 
 #include "transfer/mqtt_config.hpp"
 #include "transfer/mqtt_publisher.hpp"
+#include "transfer/push_mqtt_responder.hpp"
 #include "transfer/simulated_mqtt_bus.hpp"
 
 #include <functional>
@@ -11,12 +12,14 @@
 
 namespace transfer {
 
-// 网关 MQTT 传输抽象：订阅召唤、发布简报/内容
-class IGatewayMqtt : public IMqttPublisher {
+// 网关 MQTT：召唤上传 + 平台推送接收
+class IGatewayMqtt : public IMqttPublisher, public IPushMqttResponder {
 public:
     ~IGatewayMqtt() override = default;
 
     virtual void setSummonHandler(std::function<void(std::string_view)> handler) = 0;
+    virtual void setPushBriefHandler(std::function<void(std::string_view)> handler) = 0;
+    virtual void setPushContentHandler(std::function<void(std::string_view)> handler) = 0;
     virtual bool start(std::string& errorDetail) = 0;
     virtual void stop() = 0;
 

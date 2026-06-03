@@ -46,6 +46,11 @@ public:
     virtual FileOpenError readAt(const FileHandle& handle, uint64_t offset,
                                  uint8_t* buffer, size_t bufferSize,
                                  size_t& outRead) const = 0;
+    virtual FileOpenError openWriteCreate(const std::string& fullPath,
+                                          FileHandle& out) = 0;
+    virtual FileOpenError writeAt(const FileHandle& handle, uint64_t offset,
+                                  const uint8_t* buffer, size_t bufferSize,
+                                  size_t& outWritten) = 0;
     virtual void close(FileHandle& handle) = 0;
 };
 
@@ -63,6 +68,11 @@ public:
     FileOpenError readAt(const FileHandle& handle, uint64_t offset,
                          uint8_t* buffer, size_t bufferSize,
                          size_t& outRead) const override;
+    FileOpenError openWriteCreate(const std::string& fullPath,
+                                  FileHandle& out) override;
+    FileOpenError writeAt(const FileHandle& handle, uint64_t offset,
+                          const uint8_t* buffer, size_t bufferSize,
+                          size_t& outWritten) override;
     void close(FileHandle& handle) override;
 
 private:

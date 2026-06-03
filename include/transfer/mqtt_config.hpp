@@ -17,6 +17,12 @@ struct MqttConfig {
     std::string topicBrief;
     std::string topicContent;
 
+    // V0.0.3 平台推送文件至网关
+    std::string topicPushBrief;
+    std::string topicPushBriefConfirm;
+    std::string topicPushContent;
+    std::string topicPushContentConfirm;
+
     // 是否使用内存模拟总线（true=不连真实 Broker）
     bool useSimulatedBus = true;
 

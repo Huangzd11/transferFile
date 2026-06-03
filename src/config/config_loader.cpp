@@ -118,6 +118,12 @@ void applyMqttSection(std::string_view section, MqttConfig& mqtt) {
     if (extractJsonStringField(section, "topicSummon", val)) mqtt.topicSummon = val;
     if (extractJsonStringField(section, "topicBrief", val)) mqtt.topicBrief = val;
     if (extractJsonStringField(section, "topicContent", val)) mqtt.topicContent = val;
+    if (extractJsonStringField(section, "topicPushBrief", val)) mqtt.topicPushBrief = val;
+    if (extractJsonStringField(section, "topicPushBriefConfirm", val))
+        mqtt.topicPushBriefConfirm = val;
+    if (extractJsonStringField(section, "topicPushContent", val)) mqtt.topicPushContent = val;
+    if (extractJsonStringField(section, "topicPushContentConfirm", val))
+        mqtt.topicPushContentConfirm = val;
     if (extractJsonStringField(section, "useSimulatedBus", val) && !val.empty()) {
         bool b = true;
         if (parseBool(val, b)) mqtt.useSimulatedBus = b;
@@ -181,6 +187,10 @@ bool loadAppConfigFromFile(const std::string& filePath, AppConfig& out,
     out.mqtt.topicSummon.clear();
     out.mqtt.topicBrief.clear();
     out.mqtt.topicContent.clear();
+    out.mqtt.topicPushBrief.clear();
+    out.mqtt.topicPushBriefConfirm.clear();
+    out.mqtt.topicPushContent.clear();
+    out.mqtt.topicPushContentConfirm.clear();
 
     std::string transferSec, mqttSec;
     if (extractJsonObject(content, "transfer", transferSec)) {

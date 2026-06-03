@@ -38,6 +38,10 @@ TransferOrchestrator::TransferOrchestrator(IProtocolCodec& codec, IFileStore& fi
       crc_(crc),
       config_(std::move(config)) {}
 
+void TransferOrchestrator::setBusyChecker(BusyChecker checker) {
+    busyChecker_ = std::move(checker);
+}
+
 void TransferOrchestrator::publishBriefFailure(uint32_t cmdId,
                                                const std::string& errorCode,
                                                const std::string& note) {
@@ -130,7 +134,8 @@ void TransferOrchestrator::onSummon(std::string_view jsonUtf8) {
     watchdog_.reset(req.cmdId);
     watchdog_.arm(req.cmdId, config_.timeoutSec);
 
-    if (sessions_.hasActiveSessionOtherThan(req.cmdId)) {
+    if ((busyChecker_ && busyChecker_()) ||
+        sessions_.hasActiveSessionOtherThan(req.cmdId)) {
         publishBriefFailure(req.cmdId, errc::Busy, "gateway busy");
         return;
     }

@@ -93,6 +93,25 @@ inline void report(const char* file, int line, const std::string& msg) {
 
 #define EXPECT_GE(a, b) EXPECT_TRUE((a) >= (b))
 
+#define ASSERT_EQ(a, b)                                                            \
+    do {                                                                           \
+        if (!((a) == (b))) {                                                       \
+            minimal_test::report(__FILE__, __LINE__,                               \
+                                 std::string("Assert equality: ") + #a + " == " +  \
+                                     #b);                                          \
+            return;                                                                \
+        }                                                                          \
+    } while (0)
+
+#define ASSERT_GE(a, b)                                                            \
+    do {                                                                           \
+        if (!((a) >= (b))) {                                                       \
+            minimal_test::report(__FILE__, __LINE__,                               \
+                                 std::string("Assert >=: ") + #a + " >= " + #b);   \
+            return;                                                                \
+        }                                                                          \
+    } while (0)
+
 inline int RUN_ALL_TESTS() {
     using minimal_test::Registrar;
     int run = 0;

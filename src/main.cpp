@@ -8,6 +8,9 @@
 #include "transfer/simulated_mqtt_bus.hpp"
 #include "transfer/timeout_watchdog.hpp"
 #include "transfer/runtime_log.hpp"
+#include "transfer/push_protocol_codec.hpp"
+#include "transfer/push_receive_orchestrator.hpp"
+#include "transfer/push_session_store.hpp"
 #include "transfer/transfer_orchestrator.hpp"
 #include "transfer/version.hpp"
 
@@ -38,7 +41,8 @@ void printUsage(const char* prog) {
 void printBanner(const transfer::AppConfig& app) {
     const auto& mqtt = app.mqtt;
     const auto& tr = app.transfer;
-    std::cout << "=== transferFile V" << transfer::kVersionString << " ===\n";
+    std::cout << "=== transferFile V" << transfer::kVersionString << " ===\n"
+              << "编译时间: " << transfer::kBuildDateTime << "\n";
     if (!app.configFilePath.empty()) {
         std::cout << "配置文件: " << app.configFilePath << "\n";
     } else {
@@ -57,7 +61,11 @@ void printBanner(const transfer::AppConfig& app) {
               << (transfer::isMosquittoSupported() ? "" : " (未编译 mosquitto)") << "\n"
               << "订阅召唤: " << mqtt.topicSummon << "\n"
               << "发布简报: " << mqtt.topicBrief << "\n"
-              << "发布内容: " << mqtt.topicContent << "\n";
+              << "发布内容: " << mqtt.topicContent << "\n"
+              << "订阅推送简报: " << mqtt.topicPushBrief << "\n"
+              << "发布推送简报确认: " << mqtt.topicPushBriefConfirm << "\n"
+              << "订阅推送内容: " << mqtt.topicPushContent << "\n"
+              << "发布推送内容确认: " << mqtt.topicPushContentConfirm << "\n";
 }
 
 int runSimulateDemo(transfer::SimulatedMqttBus& bus, const transfer::AppConfig& app,
@@ -155,17 +163,33 @@ int main(int argc, char* argv[]) {
     }
 
     transfer::JsonProtocolCodec codec;
+    transfer::JsonPushProtocolCodec pushCodec;
     transfer::FileStore fileStore(app.transfer.allowedPathRoots);
     transfer::MemorySessionStore sessionStore;
+    transfer::MemoryPushSessionStore pushSessionStore;
     transfer::SteadyClock clock;
     transfer::TimeoutWatchdog watchdog(clock);
     transfer::Crc32Calculator crcCalc;
 
     transfer::TransferOrchestrator orch(codec, fileStore, sessionStore, watchdog, *mqtt,
                                         crcCalc, app.transfer);
+    transfer::PushReceiveOrchestrator pushOrch(pushCodec, fileStore, pushSessionStore,
+                                               watchdog, *mqtt, app.transfer);
+
+    orch.setBusyChecker([&]() { return pushSessionStore.hasActiveSession(); });
+    pushOrch.setBusyChecker([&]() {
+        return sessionStore.hasActiveSessionOtherThan(0);
+    });
 
     mqtt->setSummonHandler([&orch](std::string_view payload) { orch.onSummon(payload); });
-    watchdog.setCallback([&orch](uint32_t cmdId) { orch.onTimeout(cmdId); });
+    mqtt->setPushBriefHandler(
+        [&pushOrch](std::string_view payload) { pushOrch.onPushBrief(payload); });
+    mqtt->setPushContentHandler(
+        [&pushOrch](std::string_view payload) { pushOrch.onPushContent(payload); });
+    watchdog.setCallback([&](uint32_t cmdId) {
+        orch.onTimeout(cmdId);
+        pushOrch.onTimeout(cmdId);
+    });
 
     if (simulate) {
         return runSimulateDemo(bus, app, orch, *mqtt, watchdog);
@@ -180,7 +204,8 @@ int main(int argc, char* argv[]) {
     std::signal(SIGINT, onSignal);
     std::signal(SIGTERM, onSignal);
 
-    transfer::log::gatewayInfo("服务就绪：等待平台通过 MQTT 下发召唤（Ctrl+C 退出）");
+    transfer::log::gatewayInfo(
+        "服务就绪：支持平台召唤上传 + 平台推送文件至网关（Ctrl+C 退出）");
     if (app.mqtt.useSimulatedBus) {
         transfer::log::gatewayInfo("提示: 向召唤 Topic 发布 JSON，本网关将读文件并回传简报+内容");
     } else {
