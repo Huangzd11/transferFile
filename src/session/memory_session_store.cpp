@@ -9,6 +9,7 @@ bool MemorySessionStore::isActive(const SessionRecord& r) {
         case SessionState::Validating:
         case SessionState::BriefOk:
         case SessionState::SendingContent:
+        case SessionState::WaitingContentConfirm:
         case SessionState::Paused:
             return true;
         default:

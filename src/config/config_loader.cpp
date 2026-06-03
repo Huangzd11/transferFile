@@ -118,6 +118,8 @@ void applyMqttSection(std::string_view section, MqttConfig& mqtt) {
     if (extractJsonStringField(section, "topicSummon", val)) mqtt.topicSummon = val;
     if (extractJsonStringField(section, "topicBrief", val)) mqtt.topicBrief = val;
     if (extractJsonStringField(section, "topicContent", val)) mqtt.topicContent = val;
+    if (extractJsonStringField(section, "topicContentConfirm", val))
+        mqtt.topicContentConfirm = val;
     if (extractJsonStringField(section, "topicPushBrief", val)) mqtt.topicPushBrief = val;
     if (extractJsonStringField(section, "topicPushBriefConfirm", val))
         mqtt.topicPushBriefConfirm = val;
@@ -187,6 +189,7 @@ bool loadAppConfigFromFile(const std::string& filePath, AppConfig& out,
     out.mqtt.topicSummon.clear();
     out.mqtt.topicBrief.clear();
     out.mqtt.topicContent.clear();
+    out.mqtt.topicContentConfirm.clear();
     out.mqtt.topicPushBrief.clear();
     out.mqtt.topicPushBriefConfirm.clear();
     out.mqtt.topicPushContent.clear();

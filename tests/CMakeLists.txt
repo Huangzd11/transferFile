@@ -14,6 +14,8 @@ if(TRANSFER_USE_GTEST)
         unit/test_push_codec.cpp
         unit/test_push_orchestrator.cpp
         unit/test_push_e2e.cpp
+        unit/test_content_confirm_codec.cpp
+        unit/test_orchestrator_v004.cpp
     )
     target_link_libraries(transfer_tests PRIVATE transfer_core GTest::gtest_main)
     add_dependencies(transfer_tests transfer_refresh_build_info)
@@ -36,6 +38,8 @@ else()
         unit/test_push_codec.cpp
         unit/test_push_orchestrator.cpp
         unit/test_push_e2e.cpp
+        unit/test_content_confirm_codec.cpp
+        unit/test_orchestrator_v004.cpp
     )
     target_include_directories(transfer_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(transfer_tests PRIVATE transfer_core)

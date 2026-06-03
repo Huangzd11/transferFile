@@ -20,6 +20,7 @@ public:
     virtual void setSummonHandler(std::function<void(std::string_view)> handler) = 0;
     virtual void setPushBriefHandler(std::function<void(std::string_view)> handler) = 0;
     virtual void setPushContentHandler(std::function<void(std::string_view)> handler) = 0;
+    virtual void setContentConfirmHandler(std::function<void(std::string_view)> handler) = 0;
     virtual bool start(std::string& errorDetail) = 0;
     virtual void stop() = 0;
 

@@ -18,6 +18,7 @@ enum class SessionState {
     BriefOk,
     SendingContent,
     Paused,
+    WaitingContentConfirm,  // V0.0.4：已发内容段，等待平台确认
     Completed,
     Aborted
 };
@@ -50,12 +51,22 @@ struct ContentSegment {
     bool continueFlag = true;
 };
 
+// V0.0.4：平台 → 网关，召唤上传内容段确认
+struct ContentConfirmRequest {
+    uint32_t cmdId = 0;
+    uint32_t fileSegNo = 0;
+    BriefStatus status = BriefStatus::Failure;
+    std::string errorCode;
+    std::string note;
+};
+
 struct SessionRecord {
     uint32_t cmdId = 0;
     std::string fullPathFileName;
     uint64_t fileSize = 0;
     uint64_t nextFileOffset = 0;
     uint32_t nextSegNo = 1;
+    uint32_t awaitingConfirmSegNo = 0;  // 0 表示未等待确认
     std::string fileCrc;
     std::string modifyTime;
     SessionState state = SessionState::Idle;

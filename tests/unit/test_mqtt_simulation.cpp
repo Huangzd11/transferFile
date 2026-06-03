@@ -36,6 +36,8 @@ TEST(MqttSimulationTest, EndToEndSummonBriefContent) {
     transfer::SimulatedMqttAdapter adapter(bus, mqtt);
     transfer::TransferOrchestrator orch(codec, files, sessions, watchdog, adapter, crc, cfg);
     adapter.setSummonHandler([&orch](std::string_view p) { orch.onSummon(p); });
+    adapter.setContentConfirmHandler(
+        [&orch](std::string_view p) { orch.onContentConfirm(p); });
     std::string err;
     ASSERT_TRUE(adapter.start(err));
 

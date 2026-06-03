@@ -17,6 +17,7 @@ public:
     void setSummonHandler(std::function<void(std::string_view)> handler) override;
     void setPushBriefHandler(std::function<void(std::string_view)> handler) override;
     void setPushContentHandler(std::function<void(std::string_view)> handler) override;
+    void setContentConfirmHandler(std::function<void(std::string_view)> handler) override;
     bool start(std::string& errorDetail) override;
     void stop() override;
     int loop(int timeoutMs) override;
@@ -34,6 +35,7 @@ private:
     std::function<void(std::string_view)> onSummon_;
     std::function<void(std::string_view)> onPushBrief_;
     std::function<void(std::string_view)> onPushContent_;
+    std::function<void(std::string_view)> onContentConfirm_;
     bool started_ = false;
 };
 

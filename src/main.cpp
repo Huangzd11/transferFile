@@ -91,6 +91,8 @@ void printBanner(const transfer::AppConfig& app) {
     printTopicLine("sub", "summon", shortTopic(mqtt.topicSummon, topicBase));
     printTopicLine("pub", "brief", shortTopic(mqtt.topicBrief, topicBase));
     printTopicLine("pub", "content", shortTopic(mqtt.topicContent, topicBase));
+    printTopicLine("sub", "content_confirm",
+                   shortTopic(mqtt.topicContentConfirm, topicBase));
     std::cout << "      平台推送\n";
     printTopicLine("sub", "push/brief", shortTopic(mqtt.topicPushBrief, topicBase));
     printTopicLine("pub", "push/brief_ok",
@@ -216,6 +218,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqtt->setSummonHandler([&orch](std::string_view payload) { orch.onSummon(payload); });
+    mqtt->setContentConfirmHandler(
+        [&orch](std::string_view payload) { orch.onContentConfirm(payload); });
     mqtt->setPushBriefHandler(
         [&pushOrch](std::string_view payload) { pushOrch.onPushBrief(payload); });
     mqtt->setPushContentHandler(

@@ -22,6 +22,7 @@ public:
     void setSummonHandler(std::function<void(std::string_view)> handler) override;
     void setPushBriefHandler(std::function<void(std::string_view)> handler) override;
     void setPushContentHandler(std::function<void(std::string_view)> handler) override;
+    void setContentConfirmHandler(std::function<void(std::string_view)> handler) override;
     bool start(std::string& errorDetail) override;
     void stop() override;
     int loop(int timeoutMs) override;
@@ -36,6 +37,7 @@ public:
     void dispatchSummon(const std::string& payload);
     void dispatchPushBrief(const std::string& payload);
     void dispatchPushContent(const std::string& payload);
+    void dispatchContentConfirm(const std::string& payload);
 
 private:
     bool publishTopic(const std::string& topic, std::string_view jsonUtf8);
@@ -45,6 +47,7 @@ private:
     std::function<void(std::string_view)> onSummon_;
     std::function<void(std::string_view)> onPushBrief_;
     std::function<void(std::string_view)> onPushContent_;
+    std::function<void(std::string_view)> onContentConfirm_;
     std::mutex handlerMutex_;
     std::atomic<bool> connected_{false};
     bool started_ = false;

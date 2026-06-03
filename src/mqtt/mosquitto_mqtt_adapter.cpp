@@ -21,7 +21,8 @@ void onConnect(struct mosquitto* mosq, void* userdata, int rc) {
     mosquitto_subscribe(mosq, nullptr, cfg.topicSummon.c_str(), cfg.qos);
     mosquitto_subscribe(mosq, nullptr, cfg.topicPushBrief.c_str(), cfg.qos);
     mosquitto_subscribe(mosq, nullptr, cfg.topicPushContent.c_str(), cfg.qos);
-    log::gatewayInfo("MQTT 已连接，已订阅召唤与推送 Topic");
+    mosquitto_subscribe(mosq, nullptr, cfg.topicContentConfirm.c_str(), cfg.qos);
+    log::gatewayInfo("MQTT 已连接，已订阅召唤/推送/内容确认 Topic");
 }
 
 void onMessage(struct mosquitto* /*mosq*/, void* userdata,
@@ -37,6 +38,8 @@ void onMessage(struct mosquitto* /*mosq*/, void* userdata,
         self->dispatchPushBrief(payload);
     } else if (topic == cfg.topicPushContent) {
         self->dispatchPushContent(payload);
+    } else if (topic == cfg.topicContentConfirm) {
+        self->dispatchContentConfirm(payload);
     }
 }
 
@@ -57,6 +60,11 @@ void MosquittoMqttAdapter::dispatchPushContent(const std::string& payload) {
     if (onPushContent_) onPushContent_(payload);
 }
 
+void MosquittoMqttAdapter::dispatchContentConfirm(const std::string& payload) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    if (onContentConfirm_) onContentConfirm_(payload);
+}
+
 MosquittoMqttAdapter::MosquittoMqttAdapter(const MqttConfig& config) : config_(config) {}
 
 MosquittoMqttAdapter::~MosquittoMqttAdapter() { stop(); }
@@ -74,6 +82,12 @@ void MosquittoMqttAdapter::setPushBriefHandler(std::function<void(std::string_vi
 void MosquittoMqttAdapter::setPushContentHandler(std::function<void(std::string_view)> handler) {
     std::lock_guard<std::mutex> lock(handlerMutex_);
     onPushContent_ = std::move(handler);
+}
+
+void MosquittoMqttAdapter::setContentConfirmHandler(
+    std::function<void(std::string_view)> handler) {
+    std::lock_guard<std::mutex> lock(handlerMutex_);
+    onContentConfirm_ = std::move(handler);
 }
 
 bool MosquittoMqttAdapter::start(std::string& errorDetail) {

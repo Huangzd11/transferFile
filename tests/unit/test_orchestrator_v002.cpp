@@ -12,6 +12,7 @@
 #include "transfer/simulated_mqtt_bus.hpp"
 #include "transfer/timeout_watchdog.hpp"
 #include "transfer/transfer_orchestrator.hpp"
+#include "summon_test_helpers.hpp"
 
 #include <fstream>
 #include <memory>
@@ -165,6 +166,7 @@ TEST(OrchestratorV002Test, R5_ResumeContentMatchesOffsetAndSegNoReset) {
     f.bus_.clearHistory();
     // StartByte=7 → 0-based 偏移 6，首字节应为 'G'
     orch->onSummon(f.summonJson(501, f.smallPath_, 7));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     const auto& hist = f.bus_.history();
     ASSERT_TRUE(hist.size() >= 2u);
     auto contents = contentOnly(hist, f.mqtt_.config().topicContent);
@@ -186,6 +188,7 @@ TEST(OrchestratorV002Test, R5_ColdResumeAfterTimeout) {
     // 先传 4 字节（ABCD）
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(502, f.smallPath_, 1));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     auto hist1 = contentOnly(f.bus_.history(), f.mqtt_.config().topicContent);
     ASSERT_TRUE(hist1.size() == 3u);
 
@@ -204,6 +207,7 @@ TEST(OrchestratorV002Test, R5_ColdResumeAfterTimeout) {
 
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(503, f.smallPath_, 5));  // 从第 5 字节续传 → 'E'
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     auto hist2 = contentOnly(f.bus_.history(), f.mqtt_.config().topicContent);
     ASSERT_TRUE(hist2.size() >= 1u);
     std::vector<uint8_t> raw;
@@ -245,6 +249,7 @@ TEST(OrchestratorV002Test, LargeFile_MultiSegmentContinue) {
     auto orch = f.makeOrch(4096);
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(601, f.largePath_, 1));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     auto contents = contentOnly(f.bus_.history(), f.mqtt_.config().topicContent);
     ASSERT_TRUE(contents.size() == 3u);
 

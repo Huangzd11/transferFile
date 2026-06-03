@@ -11,6 +11,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 namespace transfer {
 
@@ -25,12 +26,15 @@ public:
 
     void setBusyChecker(BusyChecker checker);
     void onSummon(std::string_view jsonUtf8);
+    void onContentConfirm(std::string_view jsonUtf8);
     void onTimeout(uint32_t cmdId);
 
 private:
     void publishBriefFailure(uint32_t cmdId, const std::string& errorCode,
                              const std::string& note);
-    void sendContentFrom(SessionRecord& session, FileHandle& handle);
+    void sendNextContentSegment(uint32_t cmdId);
+    void completeTransfer(uint32_t cmdId);
+    void abortTransfer(uint32_t cmdId, const std::string& reason);
 
     IProtocolCodec& codec_;
     IFileStore& files_;
@@ -40,6 +44,7 @@ private:
     ICrc32Calculator& crc_;
     TransferConfig config_;
     BusyChecker busyChecker_;
+    std::unordered_map<uint32_t, FileHandle> openReadHandles_;
 };
 
 }  // namespace transfer

@@ -202,6 +202,18 @@ struct PlatformMqttClient {
         }
     }
 
+    bool publishContentConfirm(const std::string& contentPayload, std::string& err) {
+        std::string cmdId, segNo;
+        if (!extractJsonStringField(contentPayload, "CmdId", cmdId) ||
+            !extractJsonStringField(contentPayload, "FileSegNo", segNo)) {
+            err = "missing CmdId/FileSegNo in content";
+            return false;
+        }
+        const std::string json = R"({"Data":{"CmdId":")" + cmdId + R"(","FileSegNo":")" +
+                                 segNo + R"(","Status":"0","ErrorCode":"","Note":""}})";
+        return publishJsonTopic(config.topicContentConfirm.c_str(), json, err);
+    }
+
     void onContentMessage(const std::string& payload) {
         summarizeGatewayContent(payload);
         std::string b64, contFlag;
@@ -212,6 +224,15 @@ struct PlatformMqttClient {
             return;
         }
         receivedFile.insert(receivedFile.end(), chunk.begin(), chunk.end());
+
+        std::string pubErr;
+        if (!publishContentConfirm(payload, pubErr)) {
+            transfer::log::platformInfo("发布内容确认失败: " + pubErr);
+            transferFailed = true;
+            if (demoMode) g_running = false;
+            return;
+        }
+        transfer::log::platformInfo("<<< 已发布内容确认 -> " + config.topicContentConfirm);
 
         extractJsonStringField(payload, "Continue", contFlag);
         if (contFlag != "0") return;

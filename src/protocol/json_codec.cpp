@@ -146,4 +146,50 @@ std::string JsonProtocolCodec::encodeContent(const ContentSegment& seg) {
     return os.str();
 }
 
+bool JsonProtocolCodec::decodeContentConfirm(std::string_view jsonUtf8,
+                                             ContentConfirmRequest& out,
+                                             std::string& errorDetail) {
+    out = ContentConfirmRequest{};
+    if (jsonUtf8.find("\"Data\"") == std::string_view::npos) {
+        errorDetail = "missing Data";
+        return false;
+    }
+    std::string cmdStr, segStr, statusStr, errorCode, note;
+    if (!extractJsonStringField(jsonUtf8, "CmdId", cmdStr) ||
+        !extractJsonStringField(jsonUtf8, "FileSegNo", segStr) ||
+        !extractJsonStringField(jsonUtf8, "Status", statusStr)) {
+        errorDetail = "missing required field";
+        return false;
+    }
+    if (!parseU32(cmdStr, out.cmdId) || !parseU32(segStr, out.fileSegNo)) {
+        errorDetail = "invalid numeric field";
+        return false;
+    }
+    if (statusStr == "0") {
+        out.status = BriefStatus::Success;
+    } else if (statusStr == "1") {
+        out.status = BriefStatus::Failure;
+    } else {
+        errorDetail = "invalid Status";
+        return false;
+    }
+    extractJsonStringField(jsonUtf8, "ErrorCode", errorCode);
+    extractJsonStringField(jsonUtf8, "Note", note);
+    out.errorCode = std::move(errorCode);
+    out.note = std::move(note);
+    return true;
+}
+
+std::string JsonProtocolCodec::encodeContentConfirm(const ContentConfirmRequest& req) {
+    std::ostringstream os;
+    os << "{\"Data\":{";
+    os << "\"CmdId\":\"" << req.cmdId << "\",";
+    os << "\"FileSegNo\":\"" << req.fileSegNo << "\",";
+    os << "\"Status\":\"" << (req.status == BriefStatus::Success ? "0" : "1") << "\",";
+    os << "\"ErrorCode\":\"" << jsonEscape(req.errorCode) << "\",";
+    os << "\"Note\":\"" << jsonEscape(req.note) << "\"";
+    os << "}}";
+    return os.str();
+}
+
 }  // namespace transfer

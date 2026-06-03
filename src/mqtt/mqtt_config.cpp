@@ -10,6 +10,7 @@ MqttConfig makeDefaultMqttConfig(const std::string& gatewayId) {
     cfg.topicSummon = prefix + "/platform/summon";
     cfg.topicBrief = prefix + "/gateway/brief";
     cfg.topicContent = prefix + "/gateway/content";
+    cfg.topicContentConfirm = prefix + "/platform/content_confirm";
     cfg.topicPushBrief = prefix + "/platform/push/brief";
     cfg.topicPushBriefConfirm = prefix + "/gateway/push/brief_confirm";
     cfg.topicPushContent = prefix + "/platform/push/content";

@@ -16,6 +16,7 @@ void fillMqttTopicDefaults(MqttConfig& mqtt) {
     if (mqtt.topicSummon.empty()) mqtt.topicSummon = def.topicSummon;
     if (mqtt.topicBrief.empty()) mqtt.topicBrief = def.topicBrief;
     if (mqtt.topicContent.empty()) mqtt.topicContent = def.topicContent;
+    if (mqtt.topicContentConfirm.empty()) mqtt.topicContentConfirm = def.topicContentConfirm;
     if (mqtt.topicPushBrief.empty()) mqtt.topicPushBrief = def.topicPushBrief;
     if (mqtt.topicPushBriefConfirm.empty()) mqtt.topicPushBriefConfirm = def.topicPushBriefConfirm;
     if (mqtt.topicPushContent.empty()) mqtt.topicPushContent = def.topicPushContent;

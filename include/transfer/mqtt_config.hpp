@@ -16,6 +16,8 @@ struct MqttConfig {
     std::string topicSummon;
     std::string topicBrief;
     std::string topicContent;
+    // V0.0.4 平台对召唤上传内容段的确认（平台 → 网关）
+    std::string topicContentConfirm;
 
     // V0.0.3 平台推送文件至网关
     std::string topicPushBrief;

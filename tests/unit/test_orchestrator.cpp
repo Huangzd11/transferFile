@@ -9,6 +9,7 @@
 #include "transfer/simulated_mqtt_bus.hpp"
 #include "transfer/timeout_watchdog.hpp"
 #include "transfer/transfer_orchestrator.hpp"
+#include "summon_test_helpers.hpp"
 
 #include <fstream>
 #include <memory>
@@ -58,6 +59,7 @@ TEST(OrchestratorTest, BriefBeforeContent) {
     auto orch = f.makeOrch(4);
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(1, f.path_, 1));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     const auto& hist = f.bus_.history();
     ASSERT_TRUE(hist.size() >= 2u);
     EXPECT_EQ(hist[0].first, f.mqtt_.config().topicBrief);
@@ -82,6 +84,7 @@ TEST(OrchestratorTest, ResumeFromStartByte) {
     auto orch = f.makeOrch(4096);
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(3, f.path_, 6));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     const auto& hist = f.bus_.history();
     ASSERT_TRUE(hist.size() >= 2u);
     EXPECT_NE(hist[0].second.find("\"Status\":\"0\""), std::string::npos);
@@ -92,6 +95,7 @@ TEST(OrchestratorTest, LastSegmentContinueZero) {
     auto orch = f.makeOrch(4);
     f.bus_.clearHistory();
     orch->onSummon(f.summonJson(4, f.path_, 1));
+    summon_test::driveSummonWithContentConfirms(*orch, f.bus_, f.mqtt_.config());
     const auto& hist = f.bus_.history();
     ASSERT_TRUE(!hist.empty());
     EXPECT_NE(hist.back().second.find("\"Continue\":\"0\""), std::string::npos);
