@@ -13,7 +13,7 @@ TEST(PushCodecTest, DecodePushBrief) {
         "FullPathFileName": "/tmp/push_dst.bin",
         "FileCrc": "0xAABBCCDD",
         "FileSize": "10",
-        "ModifyTime": "2026-06-01 10:00:00"
+        "ModifyTime": "2026-06-03 10:00:00"
       }
     })";
     ASSERT_TRUE(codec.decodePushBrief(json, req, err));
@@ -21,7 +21,7 @@ TEST(PushCodecTest, DecodePushBrief) {
     EXPECT_EQ(req.fullPathFileName, "/tmp/push_dst.bin");
     EXPECT_EQ(req.fileCrc, "0xAABBCCDD");
     EXPECT_EQ(req.fileSize, 10u);
-    EXPECT_EQ(req.modifyTime, "2026-06-01 10:00:00");
+    EXPECT_EQ(req.modifyTime, "2026-06-03 10:00:00");
 }
 
 TEST(PushCodecTest, DecodePushContent) {

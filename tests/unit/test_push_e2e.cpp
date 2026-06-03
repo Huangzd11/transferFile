@@ -65,7 +65,7 @@ TEST(PushE2eTest, PlatformPushBriefAndContent) {
     const std::string brief = R"({"Data":{"CmdId":"8801","FullPathFileName":")" + gatewayPath +
                               R"(","FileCrc":")" + crcHex + R"(","FileSize":")" +
                               std::to_string(body.size()) +
-                              R"(","ModifyTime":"2026-06-01 12:00:00"}})";
+                              R"(","ModifyTime":"2026-06-03 12:00:00"}})";
     platform.publishPushBrief(brief);
 
     ASSERT_GE(platform.received().size(), 1u);

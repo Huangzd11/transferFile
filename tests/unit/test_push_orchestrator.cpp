@@ -40,7 +40,7 @@ struct PushFixture {
         return R"({"Data":{"CmdId":")" + std::to_string(cmdId) +
                R"(","FullPathFileName":")" + dstPath_ + R"(","FileCrc":")" + crcHex_ +
                R"(","FileSize":")" + std::to_string(fileSize_) +
-               R"(","ModifyTime":"2026-06-01 12:00:00"}})";
+               R"(","ModifyTime":"2026-06-03 12:00:00"}})";
     }
 
     std::string contentJson(uint32_t cmdId, uint32_t segNo, std::string_view chunk,
@@ -96,7 +96,7 @@ TEST(PushOrchestratorTest, BriefFailOnInvalidPath) {
     auto orch = f.makeOrch();
     f.bus_.clearHistory();
     const std::string json = R"({"Data":{"CmdId":"502","FullPathFileName":"/etc/passwd",)"
-                             R"("FileCrc":"0x0","FileSize":"1","ModifyTime":"2026-06-01 12:00:00"}})";
+                             R"("FileCrc":"0x0","FileSize":"1","ModifyTime":"2026-06-03 12:00:00"}})";
     orch->onPushBrief(json);
     ASSERT_EQ(f.bus_.history().size(), 1u);
     EXPECT_NE(f.bus_.history()[0].second.find("\"Status\":\"1\""), std::string::npos);

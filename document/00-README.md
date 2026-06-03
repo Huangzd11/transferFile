@@ -32,6 +32,7 @@
 12. [12-V0.0.2-验收说明.md](12-V0.0.2-验收说明.md) — R3/R4/R5/大文件验收
 13. [13-项目状态与路线图.md](13-项目状态与路线图.md) — **当前状态与下一步**
 14. [14-V0.0.3-平台推送.md](14-V0.0.3-平台推送.md) — V0.0.3 平台向网关推送文件
+15. [15-V0.0.3-验收说明.md](15-V0.0.3-验收说明.md) — P1～P4 推送验收与发布清单
 
 ## 3. 术语表
 
@@ -51,7 +52,8 @@
 | 场景 | 命令 |
 |------|------|
 | 本机编译 + 测试 | `./scripts/build-native.sh` |
-| **V0.0.2 验收** | `./scripts/run-acceptance-tests.sh` |
+| **V0.0.3 验收（42 项）** | `./scripts/run-acceptance-tests.sh` |
+| 平台推送联调 | `build/platform_sim ... --push-file <本地> --gateway-path <目标机路径>` |
 | 交叉编译网关 | `./scripts/build-openwrt.sh` |
 | **打包目标机部署** | `./scripts/package-target.sh` |
 | 联调说明 | `./scripts/debug-mqtt-local.sh` |
@@ -66,8 +68,11 @@
 | protocol-1.0 | 2026-06-01 | JSON 召唤 / 简报 / 内容 |
 | V0.0.1-impl | 2026-06-01 | 网关核心、MQTT、platform_sim、交叉编译 |
 | V0.0.2 | 2026-06-03 | 断点续传验收、R3/R4/R5/大文件测试、Base64 修复、`--start-byte`、部署打包 |
+| V0.0.3 | 2026-06-03 | 平台推送四 Topic、PushReceiveOrchestrator、`--push-file`、42 项测试 |
 | doc-11-log | 2026-06-01 | [11-运行日志.md](11-运行日志.md) |
 | doc-13-roadmap | 2026-06-03 | [13-项目状态与路线图.md](13-项目状态与路线图.md) |
+| doc-14-push | 2026-06-03 | [14-V0.0.3-平台推送.md](14-V0.0.3-平台推送.md) |
+| doc-15-accept | 2026-06-03 | [15-V0.0.3-验收说明.md](15-V0.0.3-验收说明.md) |
 
 ## 6. 实现状态
 
@@ -75,7 +80,8 @@
 |------|------|
 | R1～R5 核心逻辑 | 已实现 |
 | R3/R4/R5/大文件自动化验收 | V0.0.2 已实现（`test_orchestrator_v002.cpp`） |
-| 双机联调（平台+目标机网关） | 已验证流程 |
+| V0.0.3 平台推送（P1～P4） | 已实现（`test_push_*.cpp`，见 [15](15-V0.0.3-验收说明.md)） |
+| 双机联调（召唤 + 推送） | 已验证流程 |
 | libmosquitto 交叉编译与动态库部署 | 已实现 |
 | Topic / ErrorCode 生产定稿 | 占位，待业务方 |
 | TLS / MQTT 鉴权 | 未实现 |

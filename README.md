@@ -1,12 +1,13 @@
 # transferFile — 网关侧 MQTT 文件传输
 
-**当前版本：V0.0.2** | C++17 | CMake | 网关 + 开发机平台模拟
+**当前版本：V0.0.3** | C++17 | CMake | 网关 + 开发机平台模拟
 
 ## 功能概要
 
-- 平台经 MQTT 下发**召唤** → 网关先回**简报**，再回**文件内容**（Base64 分段）
-- 简报失败则不传内容；**180s** 超时；**断点续传**（`StartByte` 1-based）
-- 本仓库仅实现**网关** `transferFile`；联调工具 **platform_sim** 在开发机模拟平台
+- **召唤上传**：平台召唤 → 网关读本地文件 → 简报 + 内容上传；**断点续传**（`StartByte`）
+- **平台推送**（V0.0.3）：平台推简报 + 内容 → 网关写入已知路径；每段确认；**无断点续传**
+- 简报失败则不传/不收后续内容；**180s** 超时
+- 本仓库实现**网关** `transferFile`；联调工具 **platform_sim** 在开发机模拟平台
 
 ## 部署拓扑（推荐）
 
@@ -18,7 +19,7 @@
 ## 快速开始
 
 ```bash
-# 开发机：编译 + 自动化验收（31 项测试）
+# 开发机：编译 + 自动化验收（42 项测试）
 ./scripts/build-native.sh
 ./scripts/run-acceptance-tests.sh
 
@@ -45,6 +46,10 @@ echo "test" > /tmp/platform_test_file.bin
 ./build/platform_sim -c config/transferFile.platform.json \
   --gateway-file /tmp/platform_test_file.bin
 # 断点续传：加 --start-byte 4097
+
+# 开发机推送文件到目标机网关路径：
+./build/platform_sim -c config/transferFile.platform.json \
+  --push-file ./my.bin --gateway-path /tmp/my.bin
 ```
 
 ## 目录结构
@@ -68,7 +73,9 @@ transferFile/
 | 文档 | 说明 |
 |------|------|
 | [10-MQTT本机联调.md](document/10-MQTT本机联调.md) | 开发机平台 + 目标机网关 |
-| [12-V0.0.2-验收说明.md](document/12-V0.0.2-验收说明.md) | R3/R4/R5/大文件验收 |
+| [12-V0.0.2-验收说明.md](document/12-V0.0.2-验收说明.md) | 召唤 R3/R4/R5/大文件验收 |
+| [15-V0.0.3-验收说明.md](document/15-V0.0.3-验收说明.md) | 推送 P1～P4 验收 |
+| [14-V0.0.3-平台推送.md](document/14-V0.0.3-平台推送.md) | 推送协议与联调 |
 | [13-项目状态与路线图.md](document/13-项目状态与路线图.md) | 当前状态与下一步建议 |
 | [07-构建与交叉编译.md](document/07-构建与交叉编译.md) | 工具链与 OpenWrt 构建 |
 

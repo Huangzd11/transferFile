@@ -298,7 +298,7 @@ struct PlatformMqttClient {
         const std::string json =
             R"({"Data":{"CmdId":")" + std::to_string(pushCmdId) + R"(","FullPathFileName":")" +
             pushGatewayPath + R"(","FileCrc":")" + crcHex + R"(","FileSize":")" +
-            std::to_string(pushFileData.size()) + R"(","ModifyTime":"2026-06-01 12:00:00"}})";
+            std::to_string(pushFileData.size()) + R"(","ModifyTime":"2026-06-03 12:00:00"}})";
         transfer::log::platformInfo("<<< 已发布推送简报 -> " + config.topicPushBrief);
         std::cout << json << "\n";
         return publishJsonTopic(config.topicPushBrief.c_str(), json, err);
