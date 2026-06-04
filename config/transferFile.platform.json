@@ -1,5 +1,10 @@
 {
   "_comment": "开发机 platform_sim：本机模拟平台。Broker 若在开发机跑 mosquitto，用 127.0.0.1；若在别处填实际 IP",
+  "log": {
+    "logDir": "log",
+    "maxFileSizeBytes": "10485760",
+    "retainDays": "30"
+  },
   "transfer": {
     "timeoutSec": "180",
     "chunkSize": "4096",

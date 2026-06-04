@@ -1,5 +1,7 @@
 #pragma once
 
+#include "transfer/app_config.hpp"
+
 #include <string>
 
 namespace transfer {
@@ -7,8 +9,11 @@ namespace log {
 
 enum class Level { Info, Warn, Error };
 
-/** 初始化日志目录（默认 log/），按日期创建日志文件 */
-void init(const std::string& logDir = "log");
+/** 按 LogConfig 初始化：目录、按日期命名、可选大小轮转与过期清理 */
+void init(const LogConfig& config);
+
+/** 仅指定目录（轮转/保留使用 LogConfig 默认值），单元测试常用 */
+void init(const std::string& logDir);
 
 /** 关闭日志文件 */
 void shutdown();

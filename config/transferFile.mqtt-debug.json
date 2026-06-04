@@ -1,5 +1,10 @@
 {
   "_comment": "仅当网关与平台都在本机时的冒烟配置；正常联调请用 transferFile.platform.json + transferFile.gateway.target.json",
+  "log": {
+    "logDir": "log",
+    "maxFileSizeBytes": "10485760",
+    "retainDays": "30"
+  },
   "transfer": {
     "timeoutSec": "180",
     "chunkSize": "4096",

@@ -2,7 +2,9 @@
 
 #include <chrono>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
+#include <dirent.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -18,6 +20,8 @@ namespace {
 struct LogState {
     std::mutex mu;
     std::string logDir = "log";
+    uint64_t maxFileSizeBytes = 10 * 1024 * 1024;
+    uint32_t retainDays = 30;
     std::string currentDate;
     std::ofstream file;
     bool initialized = false;
@@ -107,6 +111,80 @@ bool localNow(std::tm& outTm, int& outMs) {
     return true;
 }
 
+bool parseDatePrefix(const std::string& name, std::tm& outTm) {
+    if (name.size() < 10 || name[4] != '-' || name[7] != '-') return false;
+    outTm = {};
+    outTm.tm_year = std::atoi(name.substr(0, 4).c_str()) - 1900;
+    outTm.tm_mon = std::atoi(name.substr(5, 2).c_str()) - 1;
+    outTm.tm_mday = std::atoi(name.substr(8, 2).c_str());
+    if (outTm.tm_year < 0 || outTm.tm_mon < 0 || outTm.tm_mon > 11 || outTm.tm_mday < 1 ||
+        outTm.tm_mday > 31) {
+        return false;
+    }
+    return true;
+}
+
+int daysBetweenDates(const std::tm& older, const std::tm& newer) {
+    auto toDays = [](const std::tm& tm) -> int {
+        const int y = tm.tm_year + 1900;
+        const int m = tm.tm_mon + 1;
+        const int d = tm.tm_mday;
+        int a = (14 - m) / 12;
+        int y2 = y + 4800 - a;
+        int m2 = m + 12 * a - 3;
+        return d + (153 * m2 + 2) / 5 + 365 * y2 + y2 / 4 - y2 / 100 + y2 / 400 - 32045;
+    };
+    return toDays(newer) - toDays(older);
+}
+
+void purgeOldLogs(LogState& s) {
+    if (s.retainDays == 0 || s.logDir.empty()) return;
+
+    std::tm nowTm{};
+    int ms = 0;
+    if (!localNow(nowTm, ms)) return;
+
+    DIR* dir = opendir(s.logDir.c_str());
+    if (!dir) return;
+
+    while (dirent* ent = readdir(dir)) {
+        const char* name = ent->d_name;
+        if (name[0] == '.') continue;
+        std::tm fileTm{};
+        if (!parseDatePrefix(name, fileTm)) continue;
+        if (daysBetweenDates(fileTm, nowTm) <= static_cast<int>(s.retainDays)) continue;
+
+        const std::string path = joinPath(s.logDir, name);
+        std::remove(path.c_str());
+    }
+    closedir(dir);
+}
+
+int nextRotateSuffix(const std::string& basePath) {
+    int maxN = 0;
+    for (int i = 1; i < 10000; ++i) {
+        struct stat st {};
+        if (stat((basePath + '.' + std::to_string(i)).c_str(), &st) == 0) {
+            maxN = i;
+        }
+    }
+    return maxN + 1;
+}
+
+void rotateCurrentFile(LogState& s) {
+    if (!s.file.is_open() || s.currentDate.empty()) return;
+
+    s.file.flush();
+    s.file.close();
+
+    const std::string basePath = joinPath(s.logDir, s.currentDate + ".log");
+    const int suffix = nextRotateSuffix(basePath);
+    const std::string rotated = basePath + '.' + std::to_string(suffix);
+    std::rename(basePath.c_str(), rotated.c_str());
+
+    s.file.open(basePath, std::ios::out | std::ios::app);
+}
+
 bool ensureFileForDate(LogState& s, const std::string& date) {
     if (s.currentDate == date && s.file.is_open()) return true;
 
@@ -116,6 +194,21 @@ bool ensureFileForDate(LogState& s, const std::string& date) {
     const std::string path = joinPath(s.logDir, date + ".log");
     s.file.open(path, std::ios::out | std::ios::app);
     return s.file.is_open();
+}
+
+void rotateIfNeeded(LogState& s) {
+    if (s.maxFileSizeBytes == 0 || !s.file.is_open()) return;
+
+    s.file.flush();
+    const auto pos = s.file.tellp();
+    if (pos < 0 || static_cast<uint64_t>(pos) < s.maxFileSizeBytes) return;
+    rotateCurrentFile(s);
+}
+
+void applyConfig(LogState& s, const LogConfig& config) {
+    s.logDir = config.logDir.empty() ? "log" : config.logDir;
+    s.maxFileSizeBytes = config.maxFileSizeBytes;
+    s.retainDays = config.retainDays;
 }
 
 void writeLineImpl(Level level, const char* file, int line, const std::string& msg) {
@@ -141,19 +234,27 @@ void writeLineImpl(Level level, const char* file, int line, const std::string& m
     if (ensureFileForDate(s, date)) {
         s.file << lineStr << '\n';
         s.file.flush();
+        rotateIfNeeded(s);
     }
 }
 
 }  // namespace
 
-void init(const std::string& logDir) {
+void init(const LogConfig& config) {
     auto& s = state();
     std::lock_guard<std::mutex> lock(s.mu);
-    s.logDir = logDir.empty() ? "log" : logDir;
+    applyConfig(s, config);
     mkdirRecursive(s.logDir);
+    purgeOldLogs(s);
     s.initialized = true;
     s.currentDate.clear();
     if (s.file.is_open()) s.file.close();
+}
+
+void init(const std::string& logDir) {
+    LogConfig config;
+    config.logDir = logDir;
+    init(config);
 }
 
 void shutdown() {

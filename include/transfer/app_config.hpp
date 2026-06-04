@@ -7,10 +7,18 @@
 
 namespace transfer {
 
-// 应用总配置：传输参数 + MQTT 参数
+// 运行日志配置（V0.0.5：logDir 可配置，按大小轮转与保留天数）
+struct LogConfig {
+    std::string logDir = "log";
+    uint64_t maxFileSizeBytes = 10 * 1024 * 1024;  // 10MB；0 表示不按大小轮转
+    uint32_t retainDays = 30;                      // 0 表示不自动清理
+};
+
+// 应用总配置：传输参数 + MQTT 参数 + 日志参数
 struct AppConfig {
     TransferConfig transfer;
     MqttConfig mqtt;
+    LogConfig log;
     std::string configFilePath;  // 实际加载的路径（空表示仅用默认值）
 };
 

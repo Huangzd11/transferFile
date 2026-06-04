@@ -1,12 +1,16 @@
 {
-  "_comment": "目标机 transferFile：brokerHost=开发机 ens33 (192.168.10.137) 上 mosquitto；目标机勿用 127.0.0.1",
+  "log": {
+    "logDir": "/userdata/admin/huangzd/transferFile/log",
+    "maxFileSizeBytes": "10485760",
+    "retainDays": "30"
+  },
   "transfer": {
     "timeoutSec": "180",
     "chunkSize": "4096",
     "allowedPathRoots": ["/tmp/", "/data/transfer/"]
   },
   "mqtt": {
-    "brokerHost": "192.168.10.137",
+    "brokerHost": "127.0.0.1",
     "brokerPort": "1883",
     "gatewayId": "gw001",
     "clientId": "",

@@ -466,7 +466,6 @@ struct PlatformMqttClient {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    transfer::log::init("log");
     struct LogGuard {
         ~LogGuard() { transfer::log::shutdown(); }
     } logGuard;
@@ -504,6 +503,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "加载配置失败: " << loadErr << "\n";
         return 1;
     }
+
+    transfer::log::init(app.log);
 
     std::cout << "=== platform_sim (平台模拟) ===\n"
               << "版本: V" << transfer::kVersionString << "\n"

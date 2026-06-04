@@ -39,4 +39,28 @@ TEST(ConfigLoaderTest, MissingFileUsesDefaults) {
     ASSERT_TRUE(transfer::loadAppConfig("/tmp/nonexistent_transfer_config_xyz.json", app, err));
     EXPECT_TRUE(app.configFilePath.empty());
     EXPECT_EQ(app.transfer.timeoutSec, 180u);
+    EXPECT_EQ(app.log.logDir, "log");
+    EXPECT_EQ(app.log.maxFileSizeBytes, 10u * 1024 * 1024);
+    EXPECT_EQ(app.log.retainDays, 30u);
+}
+
+TEST(ConfigLoaderTest, LoadLogSection) {
+    const std::string path = "/tmp/transfer_test_log_config.json";
+    {
+        std::ofstream out(path);
+        out << R"({
+          "log": {
+            "logDir": "/data/transfer/logs",
+            "maxFileSizeBytes": "1024",
+            "retainDays": "7"
+          }
+        })";
+    }
+
+    transfer::AppConfig app;
+    std::string err;
+    ASSERT_TRUE(transfer::loadAppConfigFromFile(path, app, err));
+    EXPECT_EQ(app.log.logDir, "/data/transfer/logs");
+    EXPECT_EQ(app.log.maxFileSizeBytes, 1024u);
+    EXPECT_EQ(app.log.retainDays, 7u);
 }

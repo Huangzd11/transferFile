@@ -106,6 +106,21 @@ void applyTransferSection(std::string_view section, TransferConfig& transfer) {
     }
 }
 
+void applyLogSection(std::string_view section, LogConfig& log) {
+    std::string val;
+    if (extractJsonStringField(section, "logDir", val) && !val.empty()) {
+        log.logDir = val;
+    }
+    if (extractJsonStringField(section, "maxFileSizeBytes", val) && !val.empty()) {
+        uint64_t n = 0;
+        if (parseU64(val, n)) log.maxFileSizeBytes = n;
+    }
+    if (extractJsonStringField(section, "retainDays", val) && !val.empty()) {
+        uint32_t n = 0;
+        if (parseU32(val, n)) log.retainDays = n;
+    }
+}
+
 void applyMqttSection(std::string_view section, MqttConfig& mqtt) {
     std::string val;
     if (extractJsonStringField(section, "brokerHost", val)) mqtt.brokerHost = val;
@@ -195,9 +210,12 @@ bool loadAppConfigFromFile(const std::string& filePath, AppConfig& out,
     out.mqtt.topicPushContent.clear();
     out.mqtt.topicPushContentConfirm.clear();
 
-    std::string transferSec, mqttSec;
+    std::string transferSec, mqttSec, logSec;
     if (extractJsonObject(content, "transfer", transferSec)) {
         applyTransferSection(transferSec, out.transfer);
+    }
+    if (extractJsonObject(content, "log", logSec)) {
+        applyLogSection(logSec, out.log);
     }
     if (extractJsonObject(content, "mqtt", mqttSec)) {
         applyMqttSection(mqttSec, out.mqtt);
