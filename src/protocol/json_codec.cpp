@@ -1,3 +1,6 @@
+// 召唤上传协议 JSON 编解码实现
+// 轻量字符串解析（非完整 JSON 库）；Content 经 Base64 + jsonEscape。
+
 #include "transfer/protocol_codec.hpp"
 
 #include "transfer/base64.hpp"
@@ -7,6 +10,7 @@
 namespace transfer {
 namespace {
 
+// 对 JSON 字符串值中的特殊字符转义
 std::string jsonEscape(const std::string& s) {
     std::string out;
     out.reserve(s.size() + 8);
@@ -35,6 +39,7 @@ std::string jsonEscape(const std::string& s) {
     return out;
 }
 
+// 从 JSON 文本中提取 "key":"..." 字符串字段（不支持嵌套对象内深层路径）
 bool extractJsonStringField(std::string_view json, std::string_view key,
                             std::string& out) {
     const std::string pattern = std::string("\"") + std::string(key) + "\"";

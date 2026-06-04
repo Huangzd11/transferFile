@@ -1,3 +1,6 @@
+// libmosquitto MQTT 适配器
+// 未定义 TRANSFER_WITH_MOSQUITTO 时提供空桩实现，start 返回未编译错误。
+
 #include "transfer/mosquitto_mqtt_adapter.hpp"
 
 #ifdef TRANSFER_WITH_MOSQUITTO
@@ -11,6 +14,7 @@
 namespace transfer {
 namespace {
 
+// 连接成功后订阅召唤、推送简报/内容、内容确认 Topic
 void onConnect(struct mosquitto* mosq, void* userdata, int rc) {
     auto* self = static_cast<MosquittoMqttAdapter*>(userdata);
     if (rc != 0) {
@@ -25,6 +29,7 @@ void onConnect(struct mosquitto* mosq, void* userdata, int rc) {
     log::gatewayInfo("MQTT 已连接，已订阅召唤/推送/内容确认 Topic");
 }
 
+// 按 Topic 分发到编排器注册的 handler
 void onMessage(struct mosquitto* /*mosq*/, void* userdata,
                const struct mosquitto_message* message) {
     auto* self = static_cast<MosquittoMqttAdapter*>(userdata);

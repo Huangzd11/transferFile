@@ -1,3 +1,6 @@
+// MQTT 连接与 Topic 配置
+// 含召唤上传、内容确认及平台推送相关 Topic 占位名。
+
 #pragma once
 
 #include <cstdint>

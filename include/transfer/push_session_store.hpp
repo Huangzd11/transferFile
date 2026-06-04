@@ -1,6 +1,11 @@
+// 平台推送会话存储接口
+// 按 CmdId 管理 PushSessionRecord，判断是否存在进行中的推送。
+
 #pragma once
 
 #include "transfer/push_types.hpp"
+
+#include <vector>
 
 #include <cstdint>
 #include <optional>

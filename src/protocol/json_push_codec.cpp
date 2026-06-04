@@ -1,3 +1,6 @@
+// 平台推送协议 JSON 编解码实现
+// 推送简报/内容解码；确认报文编码；FileCrc 十六进制解析。
+
 #include "transfer/push_protocol_codec.hpp"
 
 #include "transfer/base64.hpp"
@@ -85,6 +88,7 @@ bool parseU32(const std::string& s, uint32_t& out) {
     return true;
 }
 
+// 编码网关确认 JSON；withSegNo 为 true 时含 FileSegNo（内容确认）
 std::string encodeConfirmJson(const ProtocolConfirmResponse& resp, bool withSegNo) {
     std::ostringstream os;
     os << "{\"Data\":{";
@@ -102,6 +106,7 @@ std::string encodeConfirmJson(const ProtocolConfirmResponse& resp, bool withSegN
 
 }  // namespace
 
+// 解析 FileCrc 字符串（可选 0x 前缀）为 32 位值
 bool parseFileCrcHex(const std::string& crcStr, uint32_t& out) {
     if (crcStr.empty()) return false;
     size_t i = 0;

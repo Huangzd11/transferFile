@@ -1,3 +1,6 @@
+// 平台推送（V0.0.3）核心类型定义
+// 含推送会话状态、简报/内容段及网关确认应答结构。
+
 #pragma once
 
 #include "transfer/types.hpp"

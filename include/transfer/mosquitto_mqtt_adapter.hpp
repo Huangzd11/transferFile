@@ -1,3 +1,6 @@
+// libmosquitto 真实 MQTT 适配器
+// useSimulatedBus=false 时连接 Broker，订阅召唤/推送/内容确认 Topic。
+
 #pragma once
 
 #include "transfer/gateway_mqtt.hpp"

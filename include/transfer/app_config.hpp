@@ -1,3 +1,6 @@
+// 应用配置模型
+// 聚合传输参数、MQTT 参数、日志参数及默认值/Topic 补全逻辑。
+
 #pragma once
 
 #include "transfer/mqtt_config.hpp"

@@ -1,3 +1,6 @@
+// 平台推送接收编排实现（V0.0.3）
+// 简报确认后按序写盘；末段校验大小与 CRC 后结束会话。
+
 #include "transfer/push_receive_orchestrator.hpp"
 
 #include "transfer/crc32.hpp"

@@ -1,3 +1,6 @@
+// CRC32 实现（反射多项式 0xEDB88320）
+// 初值 0xFFFFFFFF，按字节/块更新，最终异或 0xFFFFFFFF。
+
 #include "transfer/crc32.hpp"
 
 #include <cstdio>
@@ -8,6 +11,7 @@ namespace transfer {
 
 namespace {
 
+// 单字节 CRC 递推
 uint32_t crc32Update(uint32_t crc, uint8_t byte) {
     crc ^= byte;
     for (int i = 0; i < 8; ++i) {

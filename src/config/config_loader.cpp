@@ -1,3 +1,6 @@
+// JSON 配置文件解析（轻量实现，无第三方 JSON 库）
+// 支持 transfer / log / mqtt 对象段及 allowedPathRoots 数组。
+
 #include "transfer/config_loader.hpp"
 
 #include <cctype>

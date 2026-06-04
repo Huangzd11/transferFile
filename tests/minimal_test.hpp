@@ -1,3 +1,5 @@
+// 轻量测试框架（无 gtest 时的 ASSERT/TEST 宏兼容层）
+
 #pragma once
 
 #include <cstdlib>

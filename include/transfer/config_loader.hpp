@@ -1,3 +1,6 @@
+// 配置文件加载
+// 从 transferFile.json 解析 transfer / mqtt / log 段并合并默认值。
+
 #pragma once
 
 #include "transfer/app_config.hpp"

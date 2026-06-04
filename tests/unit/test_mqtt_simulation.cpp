@@ -1,3 +1,5 @@
+// 模拟 MQTT 总线端到端单测
+
 #include "../test_compat.hpp"
 
 #include "transfer/crc32.hpp"

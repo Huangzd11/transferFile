@@ -1,3 +1,5 @@
+// Base64 编解码单测：往返、Hello 向量、4096 字节边界
+
 #include "transfer/base64.hpp"
 
 #include "../test_compat.hpp"

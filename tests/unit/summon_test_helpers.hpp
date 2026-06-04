@@ -1,3 +1,5 @@
+// 召唤上传单测辅助：模拟总线、自动内容确认、JSON 字段提取
+
 #pragma once
 
 #include "transfer/mqtt_config.hpp"

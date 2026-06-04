@@ -1,3 +1,6 @@
+// 召唤上传会话内存存储
+// 进程内 vector 保存 SessionRecord；按状态判断活跃会话。
+
 #include "transfer/session_store.hpp"
 
 #include <algorithm>

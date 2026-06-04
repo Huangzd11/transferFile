@@ -1,3 +1,5 @@
+// V0.0.4 单测：平台逐段内容确认、确认失败中止
+
 #include "../test_compat.hpp"
 #include "summon_test_helpers.hpp"
 

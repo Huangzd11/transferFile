@@ -1,3 +1,6 @@
+// 平台推送会话内存存储
+// 进程内 vector 保存 PushSessionRecord。
+
 #include "transfer/push_session_store.hpp"
 
 #include <algorithm>

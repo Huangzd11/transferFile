@@ -1,3 +1,6 @@
+// 模拟 MQTT 适配器与平台侧联调模拟器
+// 演示模式下 PlatformMqttSimulator 可自动回复内容确认。
+
 #include "transfer/mqtt_adapter.hpp"
 #include "transfer/runtime_log.hpp"
 
@@ -30,6 +33,7 @@ bool extractJsonStringField(std::string_view json, std::string_view key, std::st
     return false;
 }
 
+// 从网关内容段 JSON 摘取 CmdId/FileSegNo，构造 Status=0 的模拟确认
 std::string makeSummonContentConfirmJson(const std::string& contentPayload) {
     std::string cmdId, segNo;
     if (!extractJsonStringField(contentPayload, "CmdId", cmdId) ||

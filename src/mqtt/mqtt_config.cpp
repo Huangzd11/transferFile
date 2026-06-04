@@ -1,7 +1,10 @@
+// MQTT 默认 Topic 命名规则
+
 #include "transfer/mqtt_config.hpp"
 
 namespace transfer {
 
+// 生成 transfer/sim/{gatewayId}/platform|gateway/... 系列 Topic
 MqttConfig makeDefaultMqttConfig(const std::string& gatewayId) {
     MqttConfig cfg;
     cfg.gatewayId = gatewayId;

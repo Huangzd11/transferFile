@@ -1,3 +1,6 @@
+// 模拟 MQTT 适配器与平台侧模拟器
+// SimulatedMqttAdapter 对接总线；PlatformMqttSimulator 用于联调/演示。
+
 #pragma once
 
 #include "transfer/gateway_mqtt.hpp"

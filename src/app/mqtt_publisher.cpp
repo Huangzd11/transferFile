@@ -1,3 +1,5 @@
+// 测试用 MQTT 发布记录器
+
 #include "transfer/mqtt_publisher.hpp"
 
 namespace transfer {

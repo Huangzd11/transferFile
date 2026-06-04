@@ -1,9 +1,11 @@
+// 协议错误码常量
+// 填入简报/确认的 ErrorCode 字段；平台侧确认后可与 document/04 对齐替换。
+
 #pragma once
 
 namespace transfer {
 namespace errc {
 
-// 占位错误码（平台侧确认后统一替换，见 document/04-通信协议.md）
 inline constexpr const char* Ok = "OK";
 inline constexpr const char* BadFrame = "BAD_FRAME";
 inline constexpr const char* InvalidCmdId = "INVALID_CMD_ID";

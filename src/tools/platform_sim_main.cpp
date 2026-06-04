@@ -1,7 +1,5 @@
-/**
- * 平台侧模拟程序：通过 MQTT 向网关下发召唤，并接收简报/内容应答。
- * 用于本机与 transferFile 网关进程联调（需 Broker + libmosquitto）。
- */
+// 平台侧模拟程序（platform_sim）
+// 通过 MQTT 向网关下发召唤/推送，接收简报/内容/确认；用于开发机联调（需 Broker）。
 #include "transfer/base64.hpp"
 #include "transfer/config_loader.hpp"
 #include "transfer/crc32.hpp"

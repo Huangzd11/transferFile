@@ -1,3 +1,6 @@
+// 本地文件存储抽象
+// 路径白名单校验、只读上传与写创建推送落盘，基于 POSIX 文件描述符。
+
 #pragma once
 
 #include <cstdint>

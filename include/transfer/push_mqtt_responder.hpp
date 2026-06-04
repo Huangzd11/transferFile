@@ -1,3 +1,6 @@
+// 平台推送方向：网关 MQTT 应答接口
+// 发布推送简报确认与推送内容确认 JSON。
+
 #pragma once
 
 #include <string>
@@ -5,7 +8,6 @@
 
 namespace transfer {
 
-// 网关向平台回复推送确认（简报确认 / 内容确认）
 class IPushMqttResponder {
 public:
     virtual ~IPushMqttResponder() = default;

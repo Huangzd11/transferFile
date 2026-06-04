@@ -1,3 +1,6 @@
+// transferFile 网关主程序
+// 加载配置、初始化 MQTT/编排器，主循环 loop+看门狗 tick；--simulate 走内存总线演示。
+
 #include "transfer/config_loader.hpp"
 #include "transfer/crc32.hpp"
 #include "transfer/file_store.hpp"
@@ -104,6 +107,7 @@ void printBanner(const transfer::AppConfig& app) {
               << "  就绪  召唤上传 + 平台推送 (Ctrl+C 退出)\n\n";
 }
 
+// --simulate：发布一条召唤并打印平台模拟器收到的简报/内容
 int runSimulateDemo(transfer::SimulatedMqttBus& bus, const transfer::AppConfig& app,
                     transfer::TransferOrchestrator& orch, transfer::IGatewayMqtt& mqtt,
                     transfer::TimeoutWatchdog& watchdog) {

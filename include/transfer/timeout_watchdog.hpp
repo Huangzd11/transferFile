@@ -1,3 +1,6 @@
+// 传输超时看门狗
+// 按 CmdId 计时；超时由 tick() 触发回调（默认与配置 timeoutSec 一致）。
+
 #pragma once
 
 #include <chrono>

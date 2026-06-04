@@ -1,3 +1,5 @@
+// 构建版本信息单测
+
 #include "../test_compat.hpp"
 
 #include "transfer/version.hpp"

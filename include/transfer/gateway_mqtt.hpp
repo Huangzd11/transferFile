@@ -1,3 +1,6 @@
+// 网关统一 MQTT 接口
+// 合并召唤发布与推送确认；工厂按 useSimulatedBus 选择模拟或 mosquitto 实现。
+
 #pragma once
 
 #include "transfer/mqtt_config.hpp"

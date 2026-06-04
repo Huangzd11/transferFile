@@ -1,3 +1,6 @@
+// 召唤上传会话存储接口
+// 按 CmdId 管理 SessionRecord，支持活跃会话互斥判断。
+
 #pragma once
 
 #include "transfer/types.hpp"

@@ -1,3 +1,5 @@
+// 内存 MQTT 总线：订阅注册与同步 publish 分发
+
 #include "transfer/simulated_mqtt_bus.hpp"
 
 namespace transfer {

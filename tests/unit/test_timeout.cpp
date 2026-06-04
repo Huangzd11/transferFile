@@ -1,3 +1,5 @@
+// 超时看门狗单测（可注入时钟）
+
 #include "transfer/timeout_watchdog.hpp"
 
 #include "../test_compat.hpp"

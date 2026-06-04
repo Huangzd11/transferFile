@@ -1,3 +1,6 @@
+// 平台推送接收编排（V0.0.3）
+// 简报确认→按序写内容→逐段确认；末段 CRC 校验，不支持断点续传。
+
 #pragma once
 
 #include "transfer/push_protocol_codec.hpp"

@@ -2,11 +2,13 @@
 
 ## 部署角色
 
-| 机器 | 跑什么 | 说明 |
-|------|--------|------|
-| **开发机** | `platform_sim`、可选 **Broker** | 模拟平台：发召唤、收简报/内容 |
-| **目标机** | `transferFile` | 真实网关：读**目标机本地文件**并上传 |
-| **Broker** | mosquitto | 两边均能访问（常在开发机） |
+
+| 机器         | 跑什么                          | 说明                   |
+| ---------- | ---------------------------- | -------------------- |
+| **开发机**    | `platform_sim`、可选 **Broker** | 模拟平台：发召唤、收简报/内容      |
+| **目标机**    | `transferFile`               | 真实网关：读**目标机本地文件**并上传 |
+| **Broker** | mosquitto                    | 两边均能访问（常在开发机）        |
+
 
 ```mermaid
 flowchart LR
@@ -24,6 +26,8 @@ flowchart LR
     G -->|简报+内容| B
     B --> P
 ```
+
+
 
 **重要**：召唤 JSON 的 `FullPathFileName` 是 **目标机路径**。`--demo` 仅在网关也在本机时适用；目标机联调用 `--gateway-file` 或 `--publish`。
 
@@ -62,11 +66,13 @@ mosquitto -v
 
 ## 3. 配置文件
 
-| 文件 | 使用方 | brokerHost 示例 |
-|------|--------|-------------------|
-| `config/transferFile.platform.json` | platform_sim | `127.0.0.1` |
+
+| 文件                                        | 使用方              | brokerHost 示例            |
+| ----------------------------------------- | ---------------- | ------------------------ |
+| `config/transferFile.platform.json`       | platform_sim     | `127.0.0.1`              |
 | `config/transferFile.gateway.target.json` | 目标机 transferFile | 开发机 IP，如 `192.168.1.100` |
-| `config/transferFile.mqtt-debug.json` | 本机网关+平台冒烟 | 均为 `127.0.0.1` |
+| `config/transferFile.mqtt-debug.json`     | 本机网关+平台冒烟        | 均为 `127.0.0.1`           |
+
 
 `gatewayId` **两边必须相同**。
 
@@ -113,14 +119,16 @@ echo "test from target" > /tmp/platform_test_file.bin
 
 ## 6. platform_sim 参数
 
-| 参数 | 说明 |
-|------|------|
-| `--demo` | 本机网关联调：在开发机创建 `/tmp/platform_test_file.bin` |
-| `--gateway-file <路径>` | 目标机联调：路径为**目标机已有文件** |
-| `--publish '<json>'` | 自定义召唤 |
-| `-f summon.json` | 从文件读召唤 |
-| `--listen-only` | 只收应答 |
-| `--push-file` | V0.0.3：向网关推送文件（需 `--gateway-path`） |
+
+| 参数                    | 说明                                          |
+| --------------------- | ------------------------------------------- |
+| `--demo`              | 本机网关联调：在开发机创建 `/tmp/platform_test_file.bin` |
+| `--gateway-file <路径>` | 目标机联调：路径为**目标机已有文件**                        |
+| `--publish '<json>'`  | 自定义召唤                                       |
+| `-f summon.json`      | 从文件读召唤                                      |
+| `--listen-only`       | 只收应答                                        |
+| `--push-file`         | V0.0.3：向网关推送文件（需 `--gateway-path`）          |
+
 
 **V0.0.4**：`platform_sim` 在召唤上传时会对每段内容自动发布 `content_confirm`（与单元测试模拟器行为一致）。
 
@@ -138,13 +146,15 @@ tail -f log/$(date +%Y-%m-%d).log
 
 ## 8. 常见问题
 
-| 现象 | 原因 |
-|------|------|
-| `mosquitto -v` 端口占用 | 系统服务已运行，直接用即可 |
-| 平台收不到应答 | 网关未启动、gatewayId 不一致、brokerHost 错误 |
-| 简报 FILE_NOT_FOUND | 文件不在**目标机**或不在 allowedPathRoots |
-| `--demo` 目标机无反应 | demo 只创建开发机文件；改用 `--gateway-file` |
-| 交叉编译链接 filesystem 失败 | 已改用 POSIX，请拉最新代码重编 |
+
+| 现象                   | 原因                                |
+| -------------------- | --------------------------------- |
+| `mosquitto -v` 端口占用  | 系统服务已运行，直接用即可                     |
+| 平台收不到应答              | 网关未启动、gatewayId 不一致、brokerHost 错误 |
+| 简报 FILE_NOT_FOUND    | 文件不在**目标机**或不在 allowedPathRoots   |
+| `--demo` 目标机无反应      | demo 只创建开发机文件；改用 `--gateway-file` |
+| 交叉编译链接 filesystem 失败 | 已改用 POSIX，请拉最新代码重编                |
+
 
 ## 9. 交叉编译与部署
 

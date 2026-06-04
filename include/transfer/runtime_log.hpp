@@ -1,3 +1,6 @@
+// 运行日志（网关/平台模拟共用）
+// 控制台 + 按日文件；支持大小轮转与按保留天数清理。
+
 #pragma once
 
 #include "transfer/app_config.hpp"

@@ -1,3 +1,5 @@
+// 平台推送协议 JSON 编解码单测
+
 #include "../test_compat.hpp"
 
 #include "transfer/base64.hpp"

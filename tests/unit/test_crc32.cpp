@@ -1,3 +1,5 @@
+// CRC32 单测：已知向量与文件计算
+
 #include "transfer/crc32.hpp"
 
 #include "../test_compat.hpp"

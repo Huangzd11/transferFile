@@ -1,3 +1,6 @@
+// 召唤上传业务编排实现（V0.0.4）
+// 流程：召唤→校验→简报→按 chunkSize 发内容→等确认→续传或完成。
+
 #include "transfer/transfer_orchestrator.hpp"
 
 #include "transfer/error_codes.hpp"
@@ -10,6 +13,7 @@
 namespace transfer {
 namespace {
 
+// 日志用：过长 MQTT 载荷截断显示
 std::string payloadForLog(std::string_view payload, size_t maxLen = 2048) {
     if (payload.size() <= maxLen) {
         return std::string(payload);

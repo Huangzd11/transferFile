@@ -1,7 +1,10 @@
+// 应用默认配置与 MQTT Topic 补全
+
 #include "transfer/app_config.hpp"
 
 namespace transfer {
 
+// 与 config/transferFile.json 示例一致的默认值
 AppConfig makeDefaultAppConfig() {
     AppConfig app;
     app.transfer.timeoutSec = 180;
@@ -11,6 +14,7 @@ AppConfig makeDefaultAppConfig() {
     return app;
 }
 
+// 各 Topic 为空时按 gatewayId 生成 transfer/sim/{id}/... 占位名
 void fillMqttTopicDefaults(MqttConfig& mqtt) {
     MqttConfig def = makeDefaultMqttConfig(mqtt.gatewayId.empty() ? "gw001" : mqtt.gatewayId);
     if (mqtt.topicSummon.empty()) mqtt.topicSummon = def.topicSummon;

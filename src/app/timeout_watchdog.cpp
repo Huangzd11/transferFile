@@ -1,3 +1,6 @@
+// 传输超时看门狗实现
+// arm 设置截止时间；reset 按原 timeoutSec 顺延；tick 扫描并回调。
+
 #include "transfer/timeout_watchdog.hpp"
 
 namespace transfer {

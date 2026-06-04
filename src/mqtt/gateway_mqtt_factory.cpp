@@ -1,3 +1,5 @@
+// 网关 MQTT 工厂：模拟总线 vs libmosquitto
+
 #include "transfer/gateway_mqtt.hpp"
 
 #include "transfer/mosquitto_mqtt_adapter.hpp"

@@ -1,3 +1,5 @@
+// V0.0.4 内容确认 JSON 编解码单测
+
 #include "../test_compat.hpp"
 
 #include "transfer/protocol_codec.hpp"

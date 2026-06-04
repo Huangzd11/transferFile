@@ -1,3 +1,5 @@
+// 运行日志单测：目录创建、轮转、保留清理
+
 #include "../test_compat.hpp"
 
 #include "transfer/runtime_log.hpp"

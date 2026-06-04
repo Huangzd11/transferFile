@@ -1,3 +1,6 @@
+// 内存 MQTT 总线模拟
+// 按 Topic 同步分发消息，用于无 Broker 的单测与 --simulate 演示。
+
 #pragma once
 
 #include <functional>

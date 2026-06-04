@@ -1,3 +1,6 @@
+// 本地文件存储实现（Linux POSIX）
+// 路径规范化与白名单；O_RDONLY 上传读、O_TRUNC 推送写。
+
 #include "transfer/file_store.hpp"
 
 #include <algorithm>
@@ -41,6 +44,7 @@ FileStore::FileStore(std::vector<std::string> allowedRoots)
     }
 }
 
+// 折叠重复 '/'，去除简单 ./ 段
 std::string FileStore::normalizePath(const std::string& path) {
     if (path.empty()) return path;
     std::string out;

@@ -1,3 +1,6 @@
+// 运行日志：控制台 + 按日文件 YYYY-MM-DD.log
+// 超 maxFileSizeBytes 时轮转；超 retainDays 的日期文件删除。
+
 #include "transfer/runtime_log.hpp"
 
 #include <chrono>
