@@ -66,6 +66,8 @@ transferFile/
 └── build-openwrt/    # 交叉编译 transferFile
 ```
 
+详细说明（含 `src/` 与 MQTT 层逐文件说明）见 [document/19-项目目录结构与源码说明.md](document/19-项目目录结构与源码说明.md)。
+
 ## 文档索引
 
 详见 [document/00-README.md](document/00-README.md)。

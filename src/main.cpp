@@ -30,11 +30,11 @@
 
 namespace {
 
-const char* kDefaultConfigPath = "config/transferFile.json";
+const char* kDefaultConfigPath = "config/transferFile.json";    // 默认配置文件路径
 
-std::atomic<bool> g_running{true};
+std::atomic<bool> g_running{true}; // 运行标志, 默认true, 收到信号时设置为false
 
-void onSignal(int) { g_running = false; }
+void onSignal(int) { g_running = false; } // 信号处理函数, 收到信号时设置为false
 
 void printUsage(const char* prog) {
     std::cout << "用法: " << prog << " [选项]\n"
@@ -43,37 +43,37 @@ void printUsage(const char* prog) {
               << "  -h, --help           显示帮助\n";
 }
 
-std::string joinPathRoots(const std::vector<std::string>& roots) {
-    std::ostringstream os;
+std::string joinPathRoots(const std::vector<std::string>& roots) {    // 路径拼接函数, 将多个路径拼接成一个字符串
+    std::ostringstream os; // 路径拼接, 将多个路径拼接成一个字符串
     for (size_t i = 0; i < roots.size(); ++i) {
         if (i) os << ", ";
-        os << roots[i];
+        os << roots[i]; // 拼接路径, 将路径拼接成一个字符串
     }
-    return os.str();
+    return os.str(); // 返回拼接后的路径字符串
 }
 
 // Topic 去掉公共前缀，避免重复打印 transfer/sim/gw001/
-std::string shortTopic(const std::string& topic, const std::string& prefix) {
-    if (prefix.empty() || topic.size() < prefix.size()) return topic;
-    if (topic.compare(0, prefix.size(), prefix) == 0) {
-        return topic.substr(prefix.size());
+std::string shortTopic(const std::string& topic, const std::string& prefix) {    // 去掉公共前缀函数, 去掉topic中的公共前缀
+    if (prefix.empty() || topic.size() < prefix.size()) return topic; // 如果前缀为空或topic长度小于前缀长度, 则返回topic
+    if (topic.compare(0, prefix.size(), prefix) == 0) {     
+        return topic.substr(prefix.size()); // 如果topic以prefix开头, 则返回topic去掉prefix后的字符串
     }
-    return topic;
+    return topic; // 否则返回topic
 }
 
-void printTopicLine(const char* dir, const char* name, const std::string& suffix) {
+void printTopicLine(const char* dir, const char* name, const std::string& suffix) {    // 打印Topic行函数, 打印Topic行
     std::cout << "      " << std::left << std::setw(4) << dir << std::setw(18) << name << " "
-              << suffix << "\n";
+              << suffix << "\n"; // 打印Topic行, 打印Topic行
 }
 
 void printBanner(const transfer::AppConfig& app) {
-    const auto& mqtt = app.mqtt;
-    const auto& tr = app.transfer;
-    const std::string topicBase = "transfer/sim/" + mqtt.gatewayId + "/";
+    const auto& mqtt = app.mqtt;    // 获取MQTT配置
+    const auto& tr = app.transfer;    // 获取传输配置
+    const std::string topicBase = "transfer/sim/" + mqtt.gatewayId + "/";    // 获取Topic基址
 
-    std::string mode = mqtt.useSimulatedBus ? "模拟总线" : "mosquitto";
-    if (!mqtt.useSimulatedBus && !transfer::isMosquittoSupported()) {
-        mode += "(未编译)";
+    std::string mode = mqtt.useSimulatedBus ? "模拟总线" : "mosquitto";    // 获取传输模式
+    if (!mqtt.useSimulatedBus && !transfer::isMosquittoSupported()) {    // 如果传输模式为模拟总线且未编译mosquitto, 则添加(未编译)
+        mode += "(未编译)";    // 添加(未编译)
     }
 
     std::cout << "  transferFile V" << transfer::kVersionString << "\n"
@@ -123,54 +123,54 @@ int runSimulateDemo(transfer::SimulatedMqttBus& bus, const transfer::AppConfig& 
         out << "0123456789";
     }
 
-    transfer::PlatformMqttSimulator platform(bus, app.mqtt);
+    transfer::PlatformMqttSimulator platform(bus, app.mqtt);    // 平台模拟器
     const std::string summon = R"({"Data":{"CmdId":"9001","FullPathFileName":")" +
-                               testPath + R"(","StartByte":"1"}})";
-    std::cout << "[平台模拟] 发布召唤 -> " << app.mqtt.topicSummon << "\n";
-    platform.publishSummon(summon);
-    watchdog.tick();
+                               testPath + R"(","StartByte":"1"}})";    // 召唤命令
+    std::cout << "[平台模拟] 发布召唤 -> " << app.mqtt.topicSummon << "\n";    // 打印召唤命令
+    platform.publishSummon(summon);    // 发布召唤命令
+    watchdog.tick();    // 看门狗tick
 
-    std::cout << "[平台模拟] 收到应答 " << platform.received().size() << " 条:\n";
-    for (const auto& kv : platform.received()) {
-        std::cout << "  Topic: " << kv.first << "\n  Payload: " << kv.second << "\n\n";
+    std::cout << "[平台模拟] 收到应答 " << platform.received().size() << " 条:\n";    // 打印收到应答条数
+    for (const auto& kv : platform.received()) {    // 遍历收到应答
+        std::cout << "  Topic: " << kv.first << "\n  Payload: " << kv.second << "\n\n";    // 打印收到应答
     }
-    mqtt.stop();
-    return 0;
+    mqtt.stop();    // 停止MQTT
+    return 0;    // 返回0
 }
 
-bool parseArgs(int argc, char* argv[], std::string& configPath, bool& simulate,
+bool parseArgs(int argc, char* argv[], std::string& configPath, bool& simulate,    // 解析参数函数, 解析参数
                bool& showHelp) {
-    configPath = kDefaultConfigPath;
-    simulate = false;
-    showHelp = false;
+    configPath = kDefaultConfigPath;    // 默认配置文件路径
+    simulate = false;    // 模拟模式
+    showHelp = false;    // 帮助模式
     for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
+        std::string arg = argv[i];    // 获取参数
         if (arg == "--simulate") {
-            simulate = true;
+            simulate = true;    // 设置模拟模式
         } else if (arg == "-h" || arg == "--help") {
-            showHelp = true;
+            showHelp = true;    // 设置帮助模式
         } else if ((arg == "-c" || arg == "--config") && i + 1 < argc) {
-            configPath = argv[++i];
-        } else {
+            configPath = argv[++i];    // 获取配置文件路径
+        } else {    // 未知参数
             std::cerr << "未知参数: " << arg << "\n";
-            return false;
+            return false;    // 返回false
         }
     }
-    return true;
+    return true;    // 返回true
 }
 
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    struct LogGuard {
+    struct LogGuard {    // 日志守护函数, 日志守护函数
         ~LogGuard() { transfer::log::shutdown(); }
-    } logGuard;
+    } logGuard;    // 日志守护函数, 日志守护函数
 
-    std::string configPath;
-    bool simulate = false;
-    bool showHelp = false;
+    std::string configPath;    // 配置文件路径
+    bool simulate = false;    // 模拟模式
+    bool showHelp = false;    // 帮助模式
     if (!parseArgs(argc, argv, configPath, simulate, showHelp)) {
-        printUsage(argv[0]);
+        printUsage(argv[0]);    // 打印使用方法
         return 1;
     }
     if (showHelp) {
@@ -185,80 +185,80 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    transfer::log::init(app.log);
+    transfer::log::init(app.log);    // 初始化日志
 
     if (simulate) {
-        app.mqtt.useSimulatedBus = true;
+        app.mqtt.useSimulatedBus = true;    // 设置模拟模式
     }
 
-    printBanner(app);
+    printBanner(app);    // 打印Banner
 
-    transfer::SimulatedMqttBus bus;
-    std::string mqttCreateErr;
+    transfer::SimulatedMqttBus bus;    // 模拟总线
+    std::string mqttCreateErr;    // MQTT创建错误
     std::unique_ptr<transfer::IGatewayMqtt> mqtt =
         transfer::createGatewayMqtt(app.mqtt.useSimulatedBus ? &bus : nullptr, app.mqtt,
                                   mqttCreateErr);
-    if (!mqtt) {
+    if (!mqtt) {    // 如果MQTT创建失败
         std::cerr << "MQTT 初始化失败: " << mqttCreateErr << "\n";
         return 1;
     }
 
-    transfer::JsonProtocolCodec codec;
-    transfer::JsonPushProtocolCodec pushCodec;
-    transfer::FileStore fileStore(app.transfer.allowedPathRoots);
-    transfer::MemorySessionStore sessionStore;
-    transfer::MemoryPushSessionStore pushSessionStore;
-    transfer::SteadyClock clock;
-    transfer::TimeoutWatchdog watchdog(clock);
-    transfer::Crc32Calculator crcCalc;
+    transfer::JsonProtocolCodec codec;  // 协议编解码器
+    transfer::JsonPushProtocolCodec pushCodec; // 推送协议编解码器
+    transfer::FileStore fileStore(app.transfer.allowedPathRoots); // 文件存储器
+    transfer::MemorySessionStore sessionStore; // 会话存储器
+    transfer::MemoryPushSessionStore pushSessionStore; // 推送会话存储器
+    transfer::SteadyClock clock; // 时钟
+    transfer::TimeoutWatchdog watchdog(clock); // 看门狗
+    transfer::Crc32Calculator crcCalc; // CRC32计算器
 
-    transfer::TransferOrchestrator orch(codec, fileStore, sessionStore, watchdog, *mqtt,
+    transfer::TransferOrchestrator orch(codec, fileStore, sessionStore, watchdog, *mqtt,    // 传输编排器
                                         crcCalc, app.transfer);
-    transfer::PushReceiveOrchestrator pushOrch(pushCodec, fileStore, pushSessionStore,
+    transfer::PushReceiveOrchestrator pushOrch(pushCodec, fileStore, pushSessionStore,    // 推送接收编排器
                                                watchdog, *mqtt, app.transfer);
 
-    orch.setBusyChecker([&]() { return pushSessionStore.hasActiveSession(); });
+    orch.setBusyChecker([&]() { return pushSessionStore.hasActiveSession(); });    // 设置忙碌检查器
     pushOrch.setBusyChecker([&]() {
-        return sessionStore.hasActiveSessionOtherThan(0);
+        return sessionStore.hasActiveSessionOtherThan(0);    // 设置忙碌检查器
     });
 
-    mqtt->setSummonHandler([&orch](std::string_view payload) { orch.onSummon(payload); });
+    mqtt->setSummonHandler([&orch](std::string_view payload) { orch.onSummon(payload); });    // 设置召唤处理函数
     mqtt->setContentConfirmHandler(
-        [&orch](std::string_view payload) { orch.onContentConfirm(payload); });
+        [&orch](std::string_view payload) { orch.onContentConfirm(payload); });    // 设置内容确认处理函数
     mqtt->setPushBriefHandler(
-        [&pushOrch](std::string_view payload) { pushOrch.onPushBrief(payload); });
+        [&pushOrch](std::string_view payload) { pushOrch.onPushBrief(payload); });    // 设置推送简报处理函数
     mqtt->setPushContentHandler(
-        [&pushOrch](std::string_view payload) { pushOrch.onPushContent(payload); });
+        [&pushOrch](std::string_view payload) { pushOrch.onPushContent(payload); });    // 设置推送内容处理函数
     watchdog.setCallback([&](uint32_t cmdId) {
-        orch.onTimeout(cmdId);
-        pushOrch.onTimeout(cmdId);
+        orch.onTimeout(cmdId);    // 设置超时处理函数
+        pushOrch.onTimeout(cmdId);    // 设置超时处理函数
     });
 
     if (simulate) {
-        return runSimulateDemo(bus, app, orch, *mqtt, watchdog);
+        return runSimulateDemo(bus, app, orch, *mqtt, watchdog);    // 运行模拟演示
     }
 
     std::string startErr;
-    if (!mqtt->start(startErr)) {
+    if (!mqtt->start(startErr)) {    // 启动MQTT
         std::cerr << "MQTT 启动失败: " << startErr << "\n";
         return 1;
     }
 
-    std::signal(SIGINT, onSignal);
-    std::signal(SIGTERM, onSignal);
+    std::signal(SIGINT, onSignal);    // 设置信号处理函数
+    std::signal(SIGTERM, onSignal);    // 设置信号处理函数
 
     transfer::log::gatewayInfo("服务就绪：召唤上传 + 平台推送");
 
     while (g_running) {
-        int loopRc = mqtt->loop(100);
+        int loopRc = mqtt->loop(100);    // 循环100毫秒
         if (loopRc != 0 && !app.mqtt.useSimulatedBus) {
-            std::cerr << "mosquitto_loop 异常: " << loopRc << "\n";
+            std::cerr << "mosquitto_loop 异常: " << loopRc << "\n";    // 打印mosquitto_loop异常
         }
-        watchdog.tick();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        watchdog.tick();    // 看门狗tick
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));    // 睡眠10毫秒
     }
 
-    mqtt->stop();
-    std::cout << "已退出\n";
-    return 0;
+    mqtt->stop();    // 停止MQTT
+    std::cout << "已退出\n";    // 打印已退出
+    return 0;    // 返回0
 }
